@@ -14,3 +14,68 @@ NAME                             CPU(cores)   MEMORY(bytes)
 inference-dcf79545d-bdz2p        20m          255Mi           
 monitoring-6dcbc9797-s4p72       6m           53Mi            
 preprocessing-7c7dc7549d-2rdzb   7m           189Mi           
+--- kubectl top pods @ 14:22:23 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        20m          255Mi           
+monitoring-6dcbc9797-s4p72       6m           53Mi            
+preprocessing-7c7dc7549d-2rdzb   7m           189Mi           
+--- kubectl top pods @ 14:22:53 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        25m          255Mi           
+monitoring-6dcbc9797-s4p72       8m           53Mi            
+preprocessing-7c7dc7549d-2rdzb   9m           189Mi           
+--- kubectl top pods @ 14:23:24 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        25m          255Mi           
+monitoring-6dcbc9797-s4p72       8m           53Mi            
+preprocessing-7c7dc7549d-2rdzb   9m           189Mi           
+--- kubectl top pods @ 14:23:54 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        26m          255Mi           
+monitoring-6dcbc9797-s4p72       7m           53Mi            
+preprocessing-7c7dc7549d-2rdzb   9m           189Mi           
+--- kubectl top pods @ 14:24:24 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        26m          255Mi           
+monitoring-6dcbc9797-s4p72       7m           53Mi            
+preprocessing-7c7dc7549d-2rdzb   9m           189Mi           
+--- kubectl top pods @ 14:24:54 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        26m          255Mi           
+monitoring-6dcbc9797-s4p72       8m           54Mi            
+preprocessing-7c7dc7549d-2rdzb   9m           189Mi           
+--- kubectl top pods @ 14:25:24 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        26m          255Mi           
+monitoring-6dcbc9797-s4p72       8m           54Mi            
+preprocessing-7c7dc7549d-2rdzb   9m           189Mi           
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=150 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 14:20:53
+
+=======================================================
+  RÉSULTATS  -  CHURN / STRESS
+=======================================================
+  Rate configuré    : 150 req/min
+  Durée             : 300s
+  Requêtes envoyées : 745
+  Succès (HTTP 200) : 745
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.023s
+  Latence P95       : 0.029s
+  Latence max       : 0.036s
+=======================================================
+--- kubectl top pods @ 14:25:54 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        25m          255Mi           
+monitoring-6dcbc9797-s4p72       8m           54Mi            
+preprocessing-7c7dc7549d-2rdzb   9m           189Mi           
+--- monitoring /metrics (après) ---
+
+NAME                             READY   STATUS      RESTARTS   AGE
+inference-dcf79545d-bdz2p        1/1     Running     0          55m
+monitoring-6dcbc9797-s4p72       1/1     Running     0          55m
+preprocessing-7c7dc7549d-2rdzb   1/1     Running     0          5m53s
+segmentation-29738167-hpr98      0/1     Completed   0          18m

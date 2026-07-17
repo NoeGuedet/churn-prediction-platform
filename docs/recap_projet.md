@@ -268,11 +268,14 @@ Vue serveur (monitoring, niveau stress) : **0 échec**, latence moyenne **15,5 m
 |---|---|---|---|
 | `/transform` moyenne | 10,8 ms | 5,2 ms | **−52 %** |
 | `/transform` P95 | 29,5 ms | 6,4 ms | **−78 %** |
-| Stress 150 req/min — latence moy (client) | 33 ms | *(en cours)* | |
-| Stress — latence moy serveur (monitoring) | 15,5 ms | *(en cours)* | |
-| Stress — CPU preprocessing max | 35m | *(en cours)* | |
+| Stress 150 req/min — succès | 99,9 % (744/745) | **100 % (745/745)** | |
+| Stress — latence moy / P95 (client) | 33 / 39 ms | **23 / 29 ms** | **−30 % / −26 %** |
+| Stress — latence moy serveur (monitoring*) | 15,5 ms | ≈ 6 ms | **−60 %** |
+| Stress — CPU preprocessing max | 35m | **9m** | **−74 %** |
 
-Le reste du surcoût de `/transform` après correction (~5 ms) est l'overhead HTTP/uvicorn à travers le port-forward, pas la transformation elle-même (~0,2 ms mesurée).
+\* latence serveur après correction estimée par différence des moyennes cumulées du monitoring sur la fenêtre de test.
+
+Le reste du surcoût de `/transform` après correction (~5 ms) est l'overhead HTTP/uvicorn à travers le port-forward, pas la transformation elle-même (~0,2 ms mesurée). Fait marquant : le CronJob de segmentation s'est exécuté **pendant** le stress post-correction (planification horaire) — 0 échec malgré ses 384Mi de limits ajoutées temporairement au quota.
 
 ---
 
@@ -303,4 +306,108 @@ Pour un TP dont le sujet est « tenir sous contrainte de ressources », external
 
 ---
 
-*Document rédigé au fil du projet. Dernière mise à jour : après la séance 3 (déploiement K8s + CI/CD), avant les résultats du challenge de charge.*
+*Document rédigé au fil du projet. Dernière mise à jour : après la séance 4 (challenge de charge + correction mesurée).*
+
+---
+
+## 8. Plan de slides pour la présentation (partie 1 de l'oral, 5-7 min)
+
+> Consignes pour générer les slides : ~13 slides (≈30 s chacune), dans l'ordre chronologique du projet. Chaque slide cite ses chiffres exacts — tous sont mesurés et sourcés (captures dans `docs/captures/`, fiches dans `models/README.md`). Support visuel exigé par l'énoncé : diagramme d'architecture + tableau de dimensionnement (slides 4 et 9).
+
+### Slide 1 — Titre
+- Titre : « Mise en production d'un pipeline ML sous contrainte de ressources »
+- Sous-titre : Cas 3 — prédiction de churn télécom & recommandation d'offre. Namespace `projet-noe`, quota 2500m CPU / 1.5Gi.
+
+### Slide 2 — Contexte et cas d'usage
+- Métier : un opérateur télécom veut scorer le risque de résiliation d'un client et proposer une offre ciblée, en **moins de 200 ms**.
+- Le correcteur clone le repo, lance UNE commande de déploiement, puis un script de charge aux 3 niveaux (10, 50, 150 req/min × 5 min) sur sa machine. Aucune intervention manuelle tolérée.
+- Endpoint évalué : `POST /predict` → `{"churn_probability": 0.74, "recommended_offer": "remise_tarifaire"}`.
+- Dataset : Telco Customer Churn (IBM), 7 043 clients, 21 variables, 26,5 % de churn — licence publique.
+
+### Slide 3 — Contraintes imposées
+- Quota non négociable : **2500m CPU / 1.5Gi mémoire** (le plus serré des 3 cas).
+- 3 services obligatoires : preprocessing, inference, monitoring — + 2 modèles entraînés par nous.
+- CI/CD : tests bloquants à 80 % de couverture, images sur Docker Hub.
+- Défi spécifique du cas 3 : dimensionner les workers HTTP face à la latence d'inférence à 150 req/min.
+- Le point de vue du projet : le ML est facile, la difficulté est de **tenir la charge dans un budget strict et de le prouver par des mesures**.
+
+### Slide 4 — Architecture (slide diagramme — obligatoire)
+- Reproduire le schéma de la section 2.2 : script → `inference-svc` (NodePort) → `preprocessing-svc` (ClusterIP) → inference (2 modèles, routage par seuil) → `monitoring-svc` (ClusterIP) ; CronJob horaire.
+- Points à annoter : 2e modèle **dans** l'inference (un pod Python de plus = ~200-250Mi, soit ~15 % du quota, pour 712 Ko de modèle) ; monitoring **hors du chemin critique** (BackgroundTasks) ; stockage monitoring **borné** (deque 10 000) → RAM constante.
+- Communication : DNS interne Kubernetes (`http://preprocessing-svc:8001`), jamais d'IP de pod.
+
+### Slide 5 — Les modèles et leurs métriques
+| Modèle | Type | Métrique | Taille | Inférence |
+|---|---|---|---|---|
+| Churn | XGBoost | **AUC 0.838** (acc 0.801) | 209 Ko | 0,14 ms |
+| Offre (5 classes) | RandomForest | **accuracy 0.928** | 712 Ko | ~13 ms |
+| Segmentation | K-Means k=4 | silhouette 0.242 | 5 Ko | batch horaire |
+- Pourquoi l'AUC : dataset déséquilibré (26,5 % de churn) — un prédicteur « toujours non » a déjà 73,5 % d'accuracy. L'AUC mesure le pouvoir de tri indépendamment du seuil.
+- Seuil de déclenchement de l'offre **configurable** (env `CHURN_THRESHOLD`, défaut 0,5).
+- Données d'offre : 5 000 lignes synthétiques par règles métier + 10 % de bruit.
+- Anecdote chiffrée : le modèle d'offre est passé de **19 Mo à 712 Ko** en resserrant les hyperparamètres — avec une accuracy *meilleure* (0,918 → 0,928).
+
+### Slide 6 — Zéro dérive entraînement / production
+- `features.py` : module unique importé par l'entraînement ET par le service preprocessing (coercion des types, 19 champs → 45 features, `TotalCharges: " "` → 0.0).
+- Preprocessor fit **sur le train split uniquement** (pas de fuite) ; `handle_unknown="ignore"` → une catégorie inconnue en prod ne plante pas.
+- Artefacts rechargés avec les **versions pinnées** des libs (sklearn 1.9.0, XGBoost 3.3.0).
+
+### Slide 7 — Conteneurisation
+- 3 Dockerfiles + docker-compose ; stack validée : **100 % de succès à 300 req/min**, latence ~28 ms.
+- Images : inference **915 Mo** (1,64 Go initialement — le wheel XGBoost embarquait **401 Mo de libs CUDA inutiles**, éliminées via `--no-deps`), preprocessing 719 Mo, monitoring 244 Mo. Toutes < 1 Go.
+- Base `python:3.14-slim` + `libgomp1` (OpenMP pour XGBoost), versions pinnées partout.
+
+### Slide 8 — Pipeline CI/CD
+- 2 étages : **test** (pytest, couverture bloquante ≥ 80 % — mesurée à **97 %**, 18 tests) → **build-and-push** uniquement si tests verts (`needs: test`).
+- Build **multi-arch** (amd64 + arm64, QEMU) → la machine de correction marche quelle que soit son architecture.
+- 4 images sur Docker Hub (`noeguedet/orchestration-ml-*`, tags `1.0.0` + `latest`) ; identifiants en secrets GitHub chiffrés.
+- Validé de bout en bout : images supprimées du cluster → pods pullés depuis Docker Hub → système fonctionnel.
+
+### Slide 9 — Dimensionnement Kubernetes (tableau — obligatoire)
+| Service | requests | limits | Mesuré `kubectl top` |
+|---|---|---|---|
+| preprocessing | 200m / 192Mi | 400m / 288Mi | 175Mi |
+| inference | 450m / 448Mi | 700m / 544Mi | 250-370Mi |
+| monitoring | 100m / 96Mi | 200m / 128Mi | 55-65Mi |
+| **Σ** | **750m / 736Mi** | **1300m / 960Mi** | quota 2500m / 1536Mi |
+- Calibration par la mesure : preprocessing **2 workers → 1 worker** (305Mi → 175Mi) plutôt que d'augmenter les requests.
+- Rappel de cours : le quota compte les requests **déclarées**, pas la conso réelle ; le nœud consomme lui-même ~185m / 622Mi (mesuré).
+
+### Slide 10 — RollingUpdate : la leçon du projet
+- Stratégie : `RollingUpdate` `maxSurge: 1`, `maxUnavailable: 0` (zéro downtime, même en démo).
+- **L'incident** : premier rollout bloqué — `exceeded quota: limits.memory=384Mi, used: 1344Mi, limited: 1536Mi`. La marge des requests suffisait, pas celle des **limits** : le quota compte les DEUX dimensions.
+- **La correction** : limits resserrées à ~120-150 % du pic mesuré, jusqu'aux 4 inégalités vérifiées pour le pire cas (surge inference) : requests CPU 1750m ≥ 450m, requests mem 800Mi ≥ 448Mi, limits CPU 1200m ≥ 700m, limits mem 576Mi ≥ 544Mi.
+- **Validé** par un `kubectl rollout restart` réussi juste après.
+- Point de vigilance documenté : rollout pendant l'exécution du CronJob → marge limits.mem insuffisante (960+384+544 > 1536) → rollouts hors fenêtre du CronJob.
+
+### Slide 11 — Challenge de charge (3 niveaux imposés)
+| Niveau | Succès | Latence moy / P95 | CPU max | Restarts |
+|---|---|---|---|---|
+| Nominal (10/min) | 100 % (50/50) | 36 / 40 ms | inference 8m | 0 |
+| Charge (50/min) | 100 % (250/250) | 34 / 39 ms | inference 12m | 0 |
+| Stress (150/min) | 99,9 % (744/745) | 33 / 39 ms | preprocessing 35m | 0 |
+- Latence **plate** sur les 3 niveaux, CPU < 10 % des limits, mémoire stable → ni throttling ni OOMKill.
+- L'unique échec est côté client (tunnel port-forward) : **0 échec côté serveur** (monitoring : 1 045 requêtes, 15,5 ms moy. au stress).
+
+### Slide 12 — La correction mesurée avant/après
+- Diagnostic : le preprocessing est le 1er consommateur CPU par requête (35m vs 22m inference) — `/transform` = **10,8 ms** sur ~15 ms de temps serveur (~70 %) : plomberie pandas/sklearn sur 1 ligne.
+- Correction : `CompiledPreprocessor` — le ColumnTransformer est compilé en lookups + numpy depuis l'artefact fitted. **Équivalence stricte prouvée par test** (200 profils réels + cas limites).
+| Métrique | Avant | Après | Effet |
+|---|---|---|---|
+| `/transform` moyenne | 10,8 ms | 5,2 ms | **−52 %** |
+| `/transform` P95 | 29,5 ms | 6,4 ms | **−78 %** |
+| Stress 150/min — succès | 99,9 % | **100 %** (745/745) | |
+| Stress — latence moy / P95 (client) | 33 / 39 ms | **23 / 29 ms** | **−30 % / −26 %** |
+| Stress — CPU preprocessing max | 35m | **9m** | **−74 %** |
+- Méthode : mesurer → identifier le goulot → corriger → re-mesurer (protocole `scripts/run_challenge.sh`).
+- Fait marquant : le CronJob s'est exécuté **pendant** le stress post-correction → 0 échec malgré la pointe temporaire de quota (calcul de l'ADR vérifié en conditions réelles).
+
+### Slide 13 — Pour aller plus loin
+- **File SQS + batch inference** : l'API produit dans une file managée (zéro empreinte dans le quota, at-least-once + DLQ, scale-to-zero) ; des workers consomment **par lots** → `predict_proba` vectorisé sur N lignes. Effet : latence en pic **réduite** (CPU lissé, débit ↑) au prix d'une latence au repos légèrement **augmentée** (fenêtre de batch, ~20-100 ms à faible trafic).
+- **Pourquoi SQS plutôt que Redis** : managé (pas de broker stateful à opérer dans le cluster, pas de RAM prélevée sur les 1.5 Gi), DLQ native, métrique de profondeur directement autoscaling-ready (KEDA). Redis = excellent en latence mais c'est un état à gérer et à loger dans le quota.
+- **HPA** : autoscaling des replicas sur CPU (le quota borne le nb de pods — le calcul de marge reste nécessaire).
+- **Prometheus** : compteurs de throttling natifs (`container_cpu_cfs_throttled_periods_total`) au lieu du monitoring maison.
+
+### Slide 14 — Démo (transition vers la partie 2)
+- Ce qui sera montré : `kubectl get all -n projet-noe` (pods Running), une requête `/predict` en direct, `curl /metrics` du monitoring, et si le temps le permet un `rollout restart` (surge validé en direct).
+- Repo : `github.com/NoeGuedet/orchestration_ml` — déploiement : `kubectl apply -f k8s/ -n projet-noe`.
