@@ -57,7 +57,7 @@ def prepare_frame(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
     for col in NUMERIC_COLS:
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0).astype(float)
     for col in CATEGORICAL_COLS:
         df[col] = df[col].astype(str)
     return df[ALL_FEATURES]
