@@ -1,0 +1,16 @@
+=== NIVEAU: stress APRÈS correction (CompiledPreprocessor) — début 14:20:53 ===
+NAME                             READY   STATUS      RESTARTS   AGE
+inference-dcf79545d-bdz2p        1/1     Running     0          50m
+monitoring-6dcbc9797-s4p72       1/1     Running     0          50m
+preprocessing-7c7dc7549d-2rdzb   1/1     Running     0          52s
+segmentation-29738167-hpr98      0/1     Completed   0          13m
+--- kubectl top pods @ 14:21:23 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        6m           255Mi           
+monitoring-6dcbc9797-s4p72       4m           53Mi            
+preprocessing-7c7dc7549d-2rdzb   30m          189Mi           
+--- kubectl top pods @ 14:21:53 ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        20m          255Mi           
+monitoring-6dcbc9797-s4p72       6m           53Mi            
+preprocessing-7c7dc7549d-2rdzb   7m           189Mi           

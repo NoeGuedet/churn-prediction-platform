@@ -34,6 +34,35 @@ minikube addons enable metrics-server
 kubectl apply -f k8s/ -n projet-noe
 ```
 
+Note : sur un cluster vierge, si certaines ressources signalent `namespace not found` (le namespace est en cours d'initialisation), ré-exécuter la même commande — elle est idempotente.
+
+### Exposer le service d'inférence
+
+```bash
+# Option 1 — minikube service (garde le terminal ouvert)
+minikube service inference-svc -n projet-noe --url
+
+# Option 2 — port-forward (utilisé pour nos tests)
+kubectl port-forward svc/inference-svc 8002:8002 -n projet-noe &
+# URL : http://localhost:8002/predict
+```
+
+### Test de charge
+
+```bash
+pip install requests
+python scripts/load_test.py --case churn --level nominal --url http://localhost:8002/predict
+# niveaux : nominal (10/min), charge (50/min), stress (150/min), extreme (--rate libre)
+```
+
+Métriques en direct pendant le test :
+
+```bash
+kubectl top pods -n projet-noe                                  # conso réelle
+kubectl port-forward svc/monitoring-svc 8003:8003 -n projet-noe &
+curl http://localhost:8003/metrics                              # volume, latence, taux d'erreur
+```
+
 ### Tests
 
 ```bash

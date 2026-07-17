@@ -1,6 +1,7 @@
 """Tests du service de preprocessing : fonctions de transformation
 (exigence minimale de l'énoncé) + endpoint /transform."""
 
+import numpy as np
 import pandas as pd
 from fastapi.testclient import TestClient
 
@@ -10,7 +11,7 @@ from services.preprocessing.app.features import (
     NUMERIC_COLS,
     prepare_frame,
 )
-from services.preprocessing.app.main import app
+from services.preprocessing.app.main import app, compiled
 
 client = TestClient(app)
 
@@ -47,6 +48,26 @@ def test_transform_ok(sample_profile):
     features = resp.json()["features"]
     assert len(features) == 45
     assert all(isinstance(v, float) for v in features)
+
+
+def test_compiled_matches_sklearn_transformer():
+    """Equivalence stricte entre le CompiledPreprocessor et le
+    ColumnTransformer d'origine, sur 200 profils réels + cas limites."""
+    import csv
+    import joblib
+
+    original = joblib.load("models/preprocessor.pkl")
+    with open("data/churn.csv") as f:
+        rows = [row for _, row in zip(range(200), csv.DictReader(f))]
+    for row in rows:
+        row.pop("Churn", None)
+        row.pop("customerID", None)
+    # Cas limites : TotalCharges vide + catégorie jamais vue à l'entraînement.
+    rows[0] = {**rows[0], "TotalCharges": " "}
+    rows[1] = {**rows[1], "Contract": "CategorieInconnue"}
+    for row in rows:
+        expected = original.transform(prepare_frame(pd.DataFrame([row])))[0]
+        assert np.allclose(compiled.transform_row(row), expected)
 
 
 def test_transform_missing_field_returns_422(sample_profile):
