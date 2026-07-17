@@ -312,7 +312,13 @@ Pour un TP dont le sujet est « tenir sous contrainte de ressources », external
 
 ## 8. Plan de slides pour la présentation (partie 1 de l'oral, 5-7 min)
 
-> Consignes pour générer les slides : ~13 slides (≈30 s chacune), dans l'ordre chronologique du projet. Chaque slide cite ses chiffres exacts — tous sont mesurés et sourcés (captures dans `docs/captures/`, fiches dans `models/README.md`). Support visuel exigé par l'énoncé : diagramme d'architecture + tableau de dimensionnement (slides 4 et 9).
+> Consignes pour générer les slides : ~14 slides (≈30 s chacune), dans l'ordre chronologique du projet. Chaque slide cite ses chiffres exacts — tous sont mesurés et sourcés (captures dans `docs/captures/`, fiches dans `models/README.md`). Support visuel exigé par l'énoncé : diagramme d'architecture + tableau de dimensionnement (slides 4 et 9).
+>
+> **Directives visuelles à appliquer sur toutes les slides :**
+> - **Schémas en Mermaid** (ou équivalent vectoriel) pour les diagrammes : architecture (slide 4, type `flowchart`), pipeline CI/CD (slide 8, type `flowchart LR` test → build → push), flux d'une requête (slide 4, type `sequenceDiagram` si préféré). Pas de captures d'écran floues.
+> - **Tableaux** pour toutes les comparaisons chiffrées : dimensionnement (slide 9), benchmarks 3 niveaux (slide 11), avant/après correction (slide 12), paliers extrêmes (slide 13).
+> - **Graphiques** pour les métriques de modèle et les courbes : seuil churn (slide 5, image `docs/images/seuil_churn.png`), avant/après en barres si utile (slide 12).
+> - Une idée par slide, le chiffre clé en gras.
 
 ### Slide 1 — Titre
 - Titre : « Mise en production d'un pipeline ML sous contrainte de ressources »
@@ -343,6 +349,7 @@ Pour un TP dont le sujet est « tenir sous contrainte de ressources », external
 | Offre (5 classes) | RandomForest | **accuracy 0.928** | 712 Ko | ~13 ms |
 | Segmentation | K-Means k=4 | silhouette 0.242 | 5 Ko | batch horaire |
 - Pourquoi l'AUC : dataset déséquilibré (26,5 % de churn) — un prédicteur « toujours non » a déjà 73,5 % d'accuracy. L'AUC mesure le pouvoir de tri indépendamment du seuil.
+- **Graphique à inclure** : `docs/images/seuil_churn.png` — précision / rappel / F1 en fonction du seuil (reproductible : `scripts/analyze_threshold.py`). Lecture : le seuil déployé (0,5, F1=0,588) privilégie la précision ; l'optimum F1 est à **0,28** (F1=0,626, rappel 77,5 %) — un rattrapé coûte plus cher qu'une fausse alerte, donc si le métier veut maximiser la détection, baisser le seuil (configurable via `CHURN_THRESHOLD`, pas de redéploiement).
 - Seuil de déclenchement de l'offre **configurable** (env `CHURN_THRESHOLD`, défaut 0,5).
 - Données d'offre : 5 000 lignes synthétiques par règles métier + 10 % de bruit.
 - Anecdote chiffrée : le modèle d'offre est passé de **19 Mo à 712 Ko** en resserrant les hyperparamètres — avec une accuracy *meilleure* (0,918 → 0,928).
@@ -402,12 +409,19 @@ Pour un TP dont le sujet est « tenir sous contrainte de ressources », external
 - Méthode : mesurer → identifier le goulot → corriger → re-mesurer (protocole `scripts/run_challenge.sh`).
 - Fait marquant : le CronJob s'est exécuté **pendant** le stress post-correction → 0 échec malgré la pointe temporaire de quota (calcul de l'ADR vérifié en conditions réelles).
 
-### Slide 13 — Pour aller plus loin
+### Slide 13 — Stress test extrême (bonus)
+- Protocole : paliers croissants de 5 min (`--level extreme --rate N`), dernier palier avec succès > 80 % retenu. Capture brute : `docs/captures/extreme.txt`.
+- **Tableau des paliers** (rate configuré, requêtes, succès, latence moy/P95, restarts) : *(à compléter à la fin des paliers — valeurs dans `STRESS_TEST.md`)*
+- Point de rupture : *(à compléter — quel service a lâché en premier, preuve `kubectl describe`/`logs`)*
+- Récupération : *(à compléter — capture `kubectl get pods` après 2 min)*
+- Enseignement : *(à compléter)*
+
+### Slide 14 — Pour aller plus loin
 - **File SQS + batch inference** : l'API produit dans une file managée (zéro empreinte dans le quota, at-least-once + DLQ, scale-to-zero) ; des workers consomment **par lots** → `predict_proba` vectorisé sur N lignes. Effet : latence en pic **réduite** (CPU lissé, débit ↑) au prix d'une latence au repos légèrement **augmentée** (fenêtre de batch, ~20-100 ms à faible trafic).
 - **Pourquoi SQS plutôt que Redis** : managé (pas de broker stateful à opérer dans le cluster, pas de RAM prélevée sur les 1.5 Gi), DLQ native, métrique de profondeur directement autoscaling-ready (KEDA). Redis = excellent en latence mais c'est un état à gérer et à loger dans le quota.
 - **HPA** : autoscaling des replicas sur CPU (le quota borne le nb de pods — le calcul de marge reste nécessaire).
 - **Prometheus** : compteurs de throttling natifs (`container_cpu_cfs_throttled_periods_total`) au lieu du monitoring maison.
 
-### Slide 14 — Démo (transition vers la partie 2)
+### Slide 15 — Démo (transition vers la partie 2)
 - Ce qui sera montré : `kubectl get all -n projet-noe` (pods Running), une requête `/predict` en direct, `curl /metrics` du monitoring, et si le temps le permet un `rollout restart` (surge validé en direct).
 - Repo : `github.com/NoeGuedet/orchestration_ml` — déploiement : `kubectl apply -f k8s/ -n projet-noe`.
