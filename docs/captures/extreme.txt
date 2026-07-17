@@ -5,3 +5,251 @@ inference-dcf79545d-bdz2p        1/1   Running     0     66m
 monitoring-6dcbc9797-s4p72       1/1   Running     0     66m
 preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     17m
 segmentation-29738167-hpr98      0/1   Completed   0     30m
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=200 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 14:37:01
+
+=======================================================
+  RÉSULTATS  -  CHURN / EXTREME (RATE=200)
+=======================================================
+  Rate configuré    : 200 req/min
+  Durée             : 300s
+  Requêtes envoyées : 990
+  Succès (HTTP 200) : 990
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.024s
+  Latence P95       : 0.03s
+  Latence max       : 0.033s
+=======================================================
+--- kubectl top pods (fin de palier) ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        33m          256Mi           
+monitoring-6dcbc9797-s4p72       9m           54Mi            
+preprocessing-7c7dc7549d-2rdzb   10m          189Mi           
+--- pods (restarts?) ---
+inference-dcf79545d-bdz2p        1/1   Running     0     71m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     71m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     22m
+segmentation-29738167-hpr98      0/1   Completed   0     35m
+--- monitoring (cumul) ---
+{"uptime_s":4277.0,"total_requests":2813,"success_200":2813,"failures":0,"error_rate_pct":0.0,"requests_last_minute":197,"latency_avg_ms":9.48,"latency_p95_ms":18.96,"latency_max_ms":61.49,"recent_events":[{"ts":1784292119.1290057,"latency_ms":10.25,"status":200,"churn_probability":0.6966,"offer":"pack_support_premium"},{"ts":1784292119.4262714,"latency_ms":4.39,"status":200,"churn_probability":0.1155,"offer":"aucune_offre"},{"ts":1784292119.732941,"latency_ms":5.53,"status":200,"churn_probability":0.0147,"offer":"aucune_offre"},{"ts":1784292120.0338142,"latency_ms":5.11,"status":200,"churn_probability":0.154,"offer":"aucune_offre"},{"ts":1784292120.335628,"latency_ms":4.61,"status":200,"churn_probability":0.0312,"offer":"aucune_offre"},{"ts":1784292120.6404743,"latency_ms":4.31,"status":200,"churn_probability":0.0635,"offer":"aucune_offre"},{"ts":1784292120.9441583,"latency_ms":4.09,"status":200,"churn_probability":0.1699,"offer":"aucune_offre"},{"ts":1784292121.2430744,"latency_ms":4.28,"status":200,"churn_probability":0.0205,"offer":"aucune_offre"},{"ts":1784292121.5475433,"latency_ms":4.66,"status":200,"churn_probability":0.1006,"offer":"aucune_offre"},{"ts":1784292121.8511827,"latency_ms":4.25,"status":200,"churn_probability":0.0534,"offer":"aucune_offre"}]}
+
+########## PALIER 300 req/min — 14:42:02
+inference-dcf79545d-bdz2p        1/1   Running     0     71m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     71m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     22m
+segmentation-29738167-hpr98      0/1   Completed   0     35m
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=300 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 14:42:02
+
+=======================================================
+  RÉSULTATS  -  CHURN / EXTREME (RATE=300)
+=======================================================
+  Rate configuré    : 300 req/min
+  Durée             : 300s
+  Requêtes envoyées : 1477
+  Succès (HTTP 200) : 1477
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.023s
+  Latence P95       : 0.029s
+  Latence max       : 0.042s
+=======================================================
+--- kubectl top pods (fin de palier) ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        44m          256Mi           
+monitoring-6dcbc9797-s4p72       10m          58Mi            
+preprocessing-7c7dc7549d-2rdzb   13m          191Mi           
+--- pods (restarts?) ---
+inference-dcf79545d-bdz2p        1/1   Running     0     76m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     76m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     27m
+segmentation-29738167-hpr98      0/1   Completed   0     40m
+--- monitoring (cumul) ---
+{"uptime_s":4577.3,"total_requests":4290,"success_200":4290,"failures":0,"error_rate_pct":0.0,"requests_last_minute":294,"latency_avg_ms":8.17,"latency_p95_ms":16.6,"latency_max_ms":61.49,"recent_events":[{"ts":1784292420.439879,"latency_ms":6.43,"status":200,"churn_probability":0.5641,"offer":"remise_tarifaire"},{"ts":1784292420.6484883,"latency_ms":4.9,"status":200,"churn_probability":0.0117,"offer":"aucune_offre"},{"ts":1784292420.8555787,"latency_ms":4.81,"status":200,"churn_probability":0.0021,"offer":"aucune_offre"},{"ts":1784292421.0542095,"latency_ms":4.57,"status":200,"churn_probability":0.0045,"offer":"aucune_offre"},{"ts":1784292421.2530012,"latency_ms":2.14,"status":200,"churn_probability":0.0324,"offer":"aucune_offre"},{"ts":1784292421.4709265,"latency_ms":12.12,"status":200,"churn_probability":0.5263,"offer":"pack_support_premium"},{"ts":1784292421.6683562,"latency_ms":4.62,"status":200,"churn_probability":0.0855,"offer":"aucune_offre"},{"ts":1784292421.8701816,"latency_ms":4.72,"status":200,"churn_probability":0.0953,"offer":"aucune_offre"},{"ts":1784292422.0746086,"latency_ms":4.67,"status":200,"churn_probability":0.0145,"offer":"aucune_offre"},{"ts":1784292422.2742934,"latency_ms":4.5,"status":200,"churn_probability":0.0206,"offer":"aucune_offre"}]}
+
+########## PALIER 500 req/min — 14:47:02
+inference-dcf79545d-bdz2p        1/1   Running     0     76m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     76m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     27m
+segmentation-29738167-hpr98      0/1   Completed   0     40m
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=500 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 14:47:02
+
+=======================================================
+  RÉSULTATS  -  CHURN / EXTREME (RATE=500)
+=======================================================
+  Rate configuré    : 500 req/min
+  Durée             : 300s
+  Requêtes envoyées : 2435
+  Succès (HTTP 200) : 2435
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.022s
+  Latence P95       : 0.029s
+  Latence max       : 0.034s
+=======================================================
+--- kubectl top pods (fin de palier) ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        65m          256Mi           
+monitoring-6dcbc9797-s4p72       14m          59Mi            
+preprocessing-7c7dc7549d-2rdzb   17m          191Mi           
+--- pods (restarts?) ---
+inference-dcf79545d-bdz2p        1/1   Running     0     81m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     81m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     32m
+segmentation-29738167-hpr98      0/1   Completed   0     45m
+--- monitoring (cumul) ---
+{"uptime_s":4877.7,"total_requests":6725,"success_200":6725,"failures":0,"error_rate_pct":0.0,"requests_last_minute":486,"latency_avg_ms":7.15,"latency_p95_ms":15.68,"latency_max_ms":61.49,"recent_events":[{"ts":1784292721.6009555,"latency_ms":4.67,"status":200,"churn_probability":0.2681,"offer":"aucune_offre"},{"ts":1784292721.7233565,"latency_ms":3.89,"status":200,"churn_probability":0.0171,"offer":"aucune_offre"},{"ts":1784292721.8354633,"latency_ms":1.8,"status":200,"churn_probability":0.0823,"offer":"aucune_offre"},{"ts":1784292721.9682252,"latency_ms":3.73,"status":200,"churn_probability":0.2389,"offer":"aucune_offre"},{"ts":1784292722.0933626,"latency_ms":4.32,"status":200,"churn_probability":0.0152,"offer":"aucune_offre"},{"ts":1784292722.21599,"latency_ms":5.35,"status":200,"churn_probability":0.3959,"offer":"aucune_offre"},{"ts":1784292722.338697,"latency_ms":4.39,"status":200,"churn_probability":0.0361,"offer":"aucune_offre"},{"ts":1784292722.4560916,"latency_ms":2.81,"status":200,"churn_probability":0.068,"offer":"aucune_offre"},{"ts":1784292722.5889914,"latency_ms":6.27,"status":200,"churn_probability":0.0508,"offer":"aucune_offre"},{"ts":1784292722.7112324,"latency_ms":4.37,"status":200,"churn_probability":0.0111,"offer":"aucune_offre"}]}
+
+########## PALIER 700 req/min — 14:52:02
+inference-dcf79545d-bdz2p        1/1   Running     0     81m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     81m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     32m
+segmentation-29738167-hpr98      0/1   Completed   0     45m
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=700 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 14:52:03
+
+=======================================================
+  RÉSULTATS  -  CHURN / EXTREME (RATE=700)
+=======================================================
+  Rate configuré    : 700 req/min
+  Durée             : 300s
+  Requêtes envoyées : 3375
+  Succès (HTTP 200) : 3375
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.019s
+  Latence P95       : 0.027s
+  Latence max       : 0.037s
+=======================================================
+--- kubectl top pods (fin de palier) ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        67m          257Mi           
+monitoring-6dcbc9797-s4p72       14m          61Mi            
+preprocessing-7c7dc7549d-2rdzb   18m          191Mi           
+--- pods (restarts?) ---
+inference-dcf79545d-bdz2p        1/1   Running     0     86m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     86m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     37m
+segmentation-29738167-hpr98      0/1   Completed   0     50m
+--- monitoring (cumul) ---
+{"uptime_s":5178.0,"total_requests":10000,"success_200":10000,"failures":0,"error_rate_pct":0.0,"requests_last_minute":673,"latency_avg_ms":6.08,"latency_p95_ms":15.01,"latency_max_ms":23.52,"recent_events":[{"ts":1784293022.247725,"latency_ms":2.35,"status":200,"churn_probability":0.0029,"offer":"aucune_offre"},{"ts":1784293022.3317175,"latency_ms":2.05,"status":200,"churn_probability":0.4066,"offer":"aucune_offre"},{"ts":1784293022.420366,"latency_ms":2.24,"status":200,"churn_probability":0.147,"offer":"aucune_offre"},{"ts":1784293022.5166945,"latency_ms":4.43,"status":200,"churn_probability":0.0045,"offer":"aucune_offre"},{"ts":1784293022.6020465,"latency_ms":2.84,"status":200,"churn_probability":0.0072,"offer":"aucune_offre"},{"ts":1784293022.694486,"latency_ms":5.26,"status":200,"churn_probability":0.3282,"offer":"aucune_offre"},{"ts":1784293022.7763748,"latency_ms":2.27,"status":200,"churn_probability":0.076,"offer":"aucune_offre"},{"ts":1784293022.8720148,"latency_ms":3.98,"status":200,"churn_probability":0.2432,"offer":"aucune_offre"},{"ts":1784293022.9571958,"latency_ms":3.11,"status":200,"churn_probability":0.0146,"offer":"aucune_offre"},{"ts":1784293023.0439959,"latency_ms":2.62,"status":200,"churn_probability":0.4966,"offer":"aucune_offre"}]}
+
+########## PALIER 900 req/min — 14:57:03
+inference-dcf79545d-bdz2p        1/1   Running     0     86m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     86m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     37m
+segmentation-29738167-hpr98      0/1   Completed   0     50m
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=900 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 14:57:03
+
+=======================================================
+  RÉSULTATS  -  CHURN / EXTREME (RATE=900)
+=======================================================
+  Rate configuré    : 900 req/min
+  Durée             : 300s
+  Requêtes envoyées : 4285
+  Succès (HTTP 200) : 4285
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.016s
+  Latence P95       : 0.022s
+  Latence max       : 0.031s
+=======================================================
+--- kubectl top pods (fin de palier) ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        68m          257Mi           
+monitoring-6dcbc9797-s4p72       14m          62Mi            
+preprocessing-7c7dc7549d-2rdzb   17m          191Mi           
+--- pods (restarts?) ---
+inference-dcf79545d-bdz2p        1/1   Running     0     91m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     91m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     42m
+segmentation-29738167-hpr98      0/1   Completed   0     55m
+--- monitoring (cumul) ---
+{"uptime_s":5478.3,"total_requests":10000,"success_200":10000,"failures":0,"error_rate_pct":0.0,"requests_last_minute":854,"latency_avg_ms":4.14,"latency_p95_ms":9.74,"latency_max_ms":15.31,"recent_events":[{"ts":1784293322.7359927,"latency_ms":6.7,"status":200,"churn_probability":0.6358,"offer":"engagement_fidelite"},{"ts":1784293322.800298,"latency_ms":1.7,"status":200,"churn_probability":0.0223,"offer":"aucune_offre"},{"ts":1784293322.8678825,"latency_ms":1.93,"status":200,"churn_probability":0.0488,"offer":"aucune_offre"},{"ts":1784293322.9412014,"latency_ms":1.85,"status":200,"churn_probability":0.365,"offer":"aucune_offre"},{"ts":1784293323.0143685,"latency_ms":2.27,"status":200,"churn_probability":0.1815,"offer":"aucune_offre"},{"ts":1784293323.0865815,"latency_ms":3.67,"status":200,"churn_probability":0.0177,"offer":"aucune_offre"},{"ts":1784293323.1571848,"latency_ms":4.37,"status":200,"churn_probability":0.0537,"offer":"aucune_offre"},{"ts":1784293323.221398,"latency_ms":1.99,"status":200,"churn_probability":0.0775,"offer":"aucune_offre"},{"ts":1784293323.295423,"latency_ms":2.08,"status":200,"churn_probability":0.0455,"offer":"aucune_offre"},{"ts":1784293323.3673046,"latency_ms":4.17,"status":200,"churn_probability":0.4582,"offer":"aucune_offre"}]}
+
+########## PALIER 1200 req/min — 15:02:03
+inference-dcf79545d-bdz2p        1/1   Running     0     91m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     91m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     42m
+segmentation-29738167-hpr98      0/1   Completed   0     55m
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=1200 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 15:02:03
+
+=======================================================
+  RÉSULTATS  -  CHURN / EXTREME (RATE=1200)
+=======================================================
+  Rate configuré    : 1200 req/min
+  Durée             : 300s
+  Requêtes envoyées : 5605
+  Succès (HTTP 200) : 5605
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.014s
+  Latence P95       : 0.018s
+  Latence max       : 0.172s
+=======================================================
+--- kubectl top pods (fin de palier) ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        73m          257Mi           
+monitoring-6dcbc9797-s4p72       16m          62Mi            
+preprocessing-7c7dc7549d-2rdzb   18m          191Mi           
+--- pods (restarts?) ---
+inference-dcf79545d-bdz2p        1/1   Running     0     96m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     96m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     47m
+segmentation-29738167-hpr98      0/1   Completed   0     60m
+segmentation-29738227-h6vjx      1/1   Running     0     3s
+--- monitoring (cumul) ---
+{"uptime_s":5778.6,"total_requests":10000,"success_200":10000,"failures":0,"error_rate_pct":0.0,"requests_last_minute":1118,"latency_avg_ms":3.11,"latency_p95_ms":6.81,"latency_max_ms":162.11,"recent_events":[{"ts":1784293623.1971617,"latency_ms":4.16,"status":200,"churn_probability":0.5819,"offer":"upgrade_fibre"},{"ts":1784293623.2492871,"latency_ms":1.42,"status":200,"churn_probability":0.1368,"offer":"aucune_offre"},{"ts":1784293623.3034534,"latency_ms":4.0,"status":200,"churn_probability":0.597,"offer":"pack_support_premium"},{"ts":1784293623.3507113,"latency_ms":1.32,"status":200,"churn_probability":0.0879,"offer":"aucune_offre"},{"ts":1784293623.4064288,"latency_ms":1.34,"status":200,"churn_probability":0.1496,"offer":"aucune_offre"},{"ts":1784293623.4577384,"latency_ms":4.49,"status":200,"churn_probability":0.8486,"offer":"pack_support_premium"},{"ts":1784293623.5080636,"latency_ms":1.34,"status":200,"churn_probability":0.1785,"offer":"aucune_offre"},{"ts":1784293623.5619662,"latency_ms":1.42,"status":200,"churn_probability":0.0121,"offer":"aucune_offre"},{"ts":1784293623.6157959,"latency_ms":1.39,"status":200,"churn_probability":0.4317,"offer":"aucune_offre"},{"ts":1784293623.6763732,"latency_ms":5.08,"status":200,"churn_probability":0.6395,"offer":"upgrade_fibre"}]}
+
+########## PALIER 1500 req/min — 15:07:03
+inference-dcf79545d-bdz2p        1/1   Running     0     96m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     96m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     47m
+segmentation-29738167-hpr98      0/1   Completed   0     60m
+segmentation-29738227-h6vjx      0/1   Completed   0     3s
+[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[TEST] case=churn  rate=1500 req/min  duration=300s
+[TEST] URL : http://localhost:8002/predict
+[TEST] Début : 15:07:03
+
+=======================================================
+  RÉSULTATS  -  CHURN / EXTREME (RATE=1500)
+=======================================================
+  Rate configuré    : 1500 req/min
+  Durée             : 300s
+  Requêtes envoyées : 6878
+  Succès (HTTP 200) : 6878
+  Échecs            : 0
+  Taux de succès    : 100.0%
+  Latence moyenne   : 0.013s
+  Latence P95       : 0.016s
+  Latence max       : 0.021s
+=======================================================
+--- kubectl top pods (fin de palier) ---
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        82m          257Mi           
+monitoring-6dcbc9797-s4p72       18m          62Mi            
+preprocessing-7c7dc7549d-2rdzb   20m          191Mi           
+--- pods (restarts?) ---
+inference-dcf79545d-bdz2p        1/1   Running     0     101m
+monitoring-6dcbc9797-s4p72       1/1   Running     0     101m
+preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     52m
+segmentation-29738227-h6vjx      0/1   Completed   0     5m4s
+--- monitoring (cumul) ---
+{"uptime_s":6078.9,"total_requests":10000,"success_200":10000,"failures":0,"error_rate_pct":0.0,"requests_last_minute":1373,"latency_avg_ms":2.74,"latency_p95_ms":6.19,"latency_max_ms":162.11,"recent_events":[{"ts":1784293923.5771017,"latency_ms":1.75,"status":200,"churn_probability":0.4438,"offer":"aucune_offre"},{"ts":1784293923.623846,"latency_ms":1.73,"status":200,"churn_probability":0.0128,"offer":"aucune_offre"},{"ts":1784293923.6680825,"latency_ms":1.89,"status":200,"churn_probability":0.0134,"offer":"aucune_offre"},{"ts":1784293923.7084408,"latency_ms":1.64,"status":200,"churn_probability":0.1296,"offer":"aucune_offre"},{"ts":1784293923.7530107,"latency_ms":1.83,"status":200,"churn_probability":0.4489,"offer":"aucune_offre"},{"ts":1784293923.7990735,"latency_ms":1.97,"status":200,"churn_probability":0.0553,"offer":"aucune_offre"},{"ts":1784293923.844001,"latency_ms":2.03,"status":200,"churn_probability":0.0966,"offer":"aucune_offre"},{"ts":1784293923.8896368,"latency_ms":1.71,"status":200,"churn_probability":0.18,"offer":"aucune_offre"},{"ts":1784293923.9347692,"latency_ms":2.01,"status":200,"churn_probability":0.4188,"offer":"aucune_offre"},{"ts":1784293923.9783685,"latency_ms":2.0,"status":200,"churn_probability":0.4279,"offer":"aucune_offre"}]}

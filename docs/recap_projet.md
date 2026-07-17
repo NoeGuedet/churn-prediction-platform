@@ -410,11 +410,17 @@ Pour un TP dont le sujet est « tenir sous contrainte de ressources », external
 - Fait marquant : le CronJob s'est exécuté **pendant** le stress post-correction → 0 échec malgré la pointe temporaire de quota (calcul de l'ADR vérifié en conditions réelles).
 
 ### Slide 13 — Stress test extrême (bonus)
-- Protocole : paliers croissants de 5 min (`--level extreme --rate N`), dernier palier avec succès > 80 % retenu. Capture brute : `docs/captures/extreme.txt`.
-- **Tableau des paliers** (rate configuré, requêtes, succès, latence moy/P95, restarts) : *(à compléter à la fin des paliers — valeurs dans `STRESS_TEST.md`)*
-- Point de rupture : *(à compléter — quel service a lâché en premier, preuve `kubectl describe`/`logs`)*
-- Récupération : *(à compléter — capture `kubectl get pods` après 2 min)*
-- Enseignement : *(à compléter)*
+- Protocole : 10 paliers de 5 min (`--level extreme --rate N`, 200 → 3000 req/min), quota inchangé. Détails dans `STRESS_TEST.md`, captures `docs/captures/extreme*.txt`.
+- **Tableau des paliers** (extrait — tous à 100 %, 0 restart) :
+| Palier | Réussies | Latence moy/P95 |
+|---|---|---|
+| 200 req/min | 990/990 | 24/30 ms |
+| 1500 req/min | 6878/6878 | 13/16 ms |
+| **3000 req/min** | **12 638/12 638** | **10/13 ms** |
+- Chiffre clé : **12 638 HTTP 200 en 5 min**, latence qui *diminue* avec le débit (24 → 10 ms), inference à 118m CPU pour 700m de limit au palier max.
+- **Le plafond est côté client, pas côté cluster** : à 3000/min configurés, 84 % de requêtes effectives — le générateur (40 threads, nouvelle connexion par requête), le tunnel port-forward et la couche réseau Docker Desktop/macOS limitent le banc d'essai (latence serveur ~6 ms vs 10-24 ms côté client). Ces limites **disparaissent dans une industrialisation propre** (accès NodePort/Ingress direct, réseau Linux, keep-alive).
+- Projection mesurée : l'inference atteindrait son throttling (~700m CPU) vers **~14 000 req/min** — 5× au-delà du plafond du générateur. Mémoire stable (258Mi/544Mi) → pas d'OOMKill en vue.
+- Récupération : rien à récupérer — 0 restart, pods Running (capture dans `STRESS_TEST.md`).
 
 ### Slide 14 — Pour aller plus loin
 - **File SQS + batch inference** : l'API produit dans une file managée (zéro empreinte dans le quota, at-least-once + DLQ, scale-to-zero) ; des workers consomment **par lots** → `predict_proba` vectorisé sur N lignes. Effet : latence en pic **réduite** (CPU lissé, débit ↑) au prix d'une latence au repos légèrement **augmentée** (fenêtre de batch, ~20-100 ms à faible trafic).
