@@ -2,8 +2,22 @@
 
 ## Déploiement
 
-> ⚠️ Section en cours de rédaction — sera complétée aux séances 2 et 3.
-> À terme : les commandes exactes pour reproduire le système depuis un terminal vierge, dans l'ordre.
+### Option A — Docker Compose (local, sans Kubernetes)
+
+```bash
+git clone git@github.com:NoeGuedet/orchestration_ml.git
+cd orchestration_ml
+docker compose up --build -d
+```
+
+Vérification :
+
+```bash
+curl http://localhost:8002/health          # inference
+curl http://localhost:8003/metrics         # monitoring
+```
+
+### Option B — Kubernetes (minikube)
 
 Prérequis :
 
@@ -18,6 +32,14 @@ minikube addons enable metrics-server
 
 # Déploiement complet (séance 3)
 kubectl apply -f k8s/ -n projet-NOE
+```
+
+### Tests
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt -r services/preprocessing/requirements.txt -r services/inference/requirements.txt
+pytest            # couverture >= 80 % exigée
 ```
 
 ## Présentation

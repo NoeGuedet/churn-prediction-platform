@@ -1,0 +1,12 @@
+.venv
+.git
+.github
+docs
+data
+tests
+scripts
+*.md
+pytest.ini
+requirements-dev.txt
+.dockerignore
+docker-compose.yml

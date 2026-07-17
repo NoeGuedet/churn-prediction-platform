@@ -1,0 +1,32 @@
+services:
+  preprocessing:
+    build:
+      context: .
+      dockerfile: services/preprocessing/Dockerfile
+    image: orchestration-ml/preprocessing:1.0.0
+    ports:
+      - "8001:8001"
+
+  inference:
+    build:
+      context: .
+      dockerfile: services/inference/Dockerfile
+    image: orchestration-ml/inference:1.0.0
+    ports:
+      - "8002:8002"
+    environment:
+      PREPROCESSING_URL: http://preprocessing:8001
+      MONITORING_URL: http://monitoring:8003
+      CHURN_THRESHOLD: "0.5"
+      WORKERS: "2"
+    depends_on:
+      - preprocessing
+      - monitoring
+
+  monitoring:
+    build:
+      context: .
+      dockerfile: services/monitoring/Dockerfile
+    image: orchestration-ml/monitoring:1.0.0
+    ports:
+      - "8003:8003"
