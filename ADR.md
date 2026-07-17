@@ -1,6 +1,6 @@
 # Architecture Decision Record
 
-Cas d'usage 3 — Prédiction de churn et recommandation d'offre. Namespace `projet-NOE`. Quota imposé : **2500m CPU / 1.5Gi mémoire**, non négociable.
+Cas d'usage 3 — Prédiction de churn et recommandation d'offre. Namespace `projet-noe` (les noms de namespaces Kubernetes doivent être en minuscules, RFC 1123). Quota imposé : **2500m CPU / 1.5Gi mémoire**, non négociable.
 
 ## 1. Cas d'usage choisi et compatibilité avec le quota
 
@@ -8,16 +8,16 @@ Nous avons choisi le cas 3, prédiction de churn et recommandation d'offre pour 
 
 Le raisonnement de dimensionnement suit la nature de chaque service. Le preprocessing ne charge aucun modèle : il applique des transformations tabulaires (encodage des variables catégorielles, mise à l'échelle) dont le coût est surtout du CPU en pics courts, avec une mémoire modeste et stable que nous estimons à 200-250 Mi. L'inférence charge ses deux modèles au démarrage — le pic de mémoire a lieu au chargement des poids, pas sous charge — et consomme ensuite le runtime Python/scikit-learn/XGBoost, soit environ 400-500 Mi au total. Le monitoring ne fait que compter et stocker des métriques en mémoire ; sa consommation de base est faible (environ 130 Mi) et ne croît que lentement avec le volume de requêtes enregistrées. Le CronJob de segmentation, lui, ne consomme que pendant son exécution (quelques minutes par heure) mais ses requests s'ajoutent temporairement au quota pendant ce laps de temps.
 
-Ces estimations débouchent sur le dimensionnement initial suivant, qui sera confirmé ou corrigé par mesure réelle (`kubectl top pods`) en séance 3 :
+Ces estimations ont ensuite été confrontées aux mesures réelles (`kubectl top pods`) en séance 3, et le dimensionnement final est le suivant :
 
-| Service | requests CPU | requests mémoire | limits CPU | limits mémoire |
-|---|---|---|---|---|
-| preprocessing | 250m | 256Mi | 500m | 384Mi |
-| inference | 500m | 512Mi | 1000m | 768Mi |
-| monitoring | 150m | 128Mi | 300m | 192Mi |
-| segmentation (CronJob) | 200m | 256Mi | 400m | 384Mi |
+| Service | requests CPU | requests mémoire | limits CPU | limits mémoire | Mesuré (`kubectl top`) |
+|---|---|---|---|---|---|
+| preprocessing (1 worker) | 200m | 192Mi | 400m | 288Mi | 175Mi |
+| inference | 450m | 448Mi | 700m | 544Mi | 250-370Mi |
+| monitoring | 100m | 96Mi | 200m | 128Mi | 55-65Mi |
+| segmentation (CronJob) | 200m | 256Mi | 400m | 384Mi | ~300Mi pendant le run |
 
-La somme des requests permanents est de **900m CPU / 896Mi**, soit 36 % du quota CPU et 58 % du quota mémoire. Même pendant l'exécution du CronJob, le total atteint 1100m / 1152Mi et reste sous le quota. La compatibilité est donc démontrée avec de la marge, marge dont la section 5 montre qu'elle est nécessaire aux mises à jour.
+La somme des requests permanents est de **750m CPU / 736Mi** (30 % et 48 % du quota), la somme des limits de **1300m / 960Mi**. Deux calibrations issues de la mesure méritent d'être consignées. D'abord, le preprocessing mesuré à 305Mi avec 2 workers Gunicorn (chacun charge pandas + scikit-learn, ~150Mi) dépassait ses requests de 256Mi : comme une transformation ne coûte que 5-10 ms de CPU, nous sommes passés à **un seul worker** — 175Mi mesurés — plutôt que d'augmenter les requests, conformément à la discipline du quota. Ensuite, les valeurs mesurées ont permis de resserrer les limits à ~120-150 % du pic observé, ce qui s'est révélé indispensable pour la section 5.
 
 ## 2. Dataset et licence
 
@@ -35,6 +35,13 @@ Nous choisissons GitHub Actions, pour deux critères concrets. Le premier est l'
 
 ## 5. Stratégie de déploiement
 
-Nous retenons `RollingUpdate` avec `maxSurge: 1` et `maxUnavailable: 0` pour le service d'inférence, afin de garantir l'absence d'interruption de service pendant les mises à jour — y compris pendant la démonstration. Le calcul de marge qui justifie ce choix est le suivant. La marge disponible dans le quota est le quota moins la somme des requests permanents : (2500 − 900) = **1600m CPU** et (1536 − 896) = **640 Mi mémoire**. Le service le plus coûteux à faire surger est l'inférence (requests de 500m / 512Mi) : son surge temporaire (500m / 512Mi) tient dans la marge (1600m / 640Mi), donc le nouveau pod peut démarrer avant l'arrêt de l'ancien sans violer le quota, et la mise à jour ne peut pas rester bloquée en `Pending`. Les surges du preprocessing (250m / 256Mi) et du monitoring (150m / 128Mi) tiennent a fortiori dans cette même marge.
+Nous retenons `RollingUpdate` avec `maxSurge: 1` et `maxUnavailable: 0` pour le service d'inférence, afin de garantir l'absence d'interruption de service pendant les mises à jour — y compris pendant la démonstration. Le point capital, appris à nos dépens lors de la séance 3, est que **la marge de surge doit être vérifiée sur les deux dimensions du quota, requests ET limits** : notre quota comptabilise les deux, et une première version du dimensionnement (limits plus généreuses, Σ limits.memory de 1344Mi) a produit un rollout bloqué — `exceeded quota: ... limits.memory=384Mi, used: 1344Mi, limited: 1536Mi` — alors que la marge des requests suffisait. Le nouveau pod ne pouvait pas être créé, et comme `maxUnavailable: 0` interdit de tuer l'ancien avant, la mise à jour restait figée sans que rien ne plante.
 
-Un point de vigilance demeure : si un rollout de l'inférence coïncide avec l'exécution du CronJob de segmentation (200m / 256Mi), la marge mémoire restante tombe à 384 Mi, insuffisante pour le surge de 512 Mi. Ce risque est traité par exploitation plutôt que par sur-dimensionnement : le CronJob est planifié toutes les heures pour une exécution de quelques minutes, et les mises à jour sont des opérations manuelles rares que nous effectuerons hors de ces fenêtres ; le risque résiduel est un rollout temporairement en attente, sans interruption de service puisque `maxUnavailable: 0` conserve l'ancien pod actif. Un `LimitRange` complète le dispositif en imposant des valeurs par défaut (defaultRequest 100m / 128Mi, default 250m / 256Mi) et des bornes (min 50m / 64Mi, max 1000m / 768Mi) cohérentes avec le tableau de dimensionnement, afin qu'aucun conteneur ne puisse déclarer des ressources hors de l'enveloppe planifiée.
+Le calcul corrigé, pour le pire cas (surge de l'inférence, le plus gros pod), est le suivant. Marge = quota − somme des valeurs permanentes :
+
+- **requests** : CPU (2500 − 750) = 1750m ≥ 450m ✓ ; mémoire (1536 − 736) = 800Mi ≥ 448Mi ✓
+- **limits** : CPU (2500 − 1300) = 1200m ≥ 700m ✓ ; mémoire (1536 − 960) = 576Mi ≥ 544Mi ✓
+
+Les quatre inégalités tiennent, donc le nouveau pod peut démarrer avant l'arrêt de l'ancien sans violer le quota. Cette propriété a été validée expérimentalement par un `kubectl rollout restart deployment/inference` exécuté avec succès immédiatement après la correction. Les surges du preprocessing (200m / 192Mi de requests) et du monitoring (100m / 96Mi) tiennent a fortiori.
+
+Un point de vigilance demeure : si un rollout de l'inférence coïncide avec l'exécution du CronJob de segmentation (limits 400m / 384Mi), la somme des limits.memory atteint 960 + 384 = 1344Mi et la marge restante (192Mi) ne suffit plus au surge de 544Mi. Ce risque est traité par exploitation plutôt que par sur-dimensionnement : le CronJob est planifié toutes les heures pour une exécution de quelques minutes, et les mises à jour sont des opérations manuelles rares que nous effectuerons hors de ces fenêtres ; le risque résiduel est un rollout temporairement en attente, sans interruption de service puisque `maxUnavailable: 0` conserve l'ancien pod actif. Un `LimitRange` complète le dispositif en imposant des valeurs par défaut (defaultRequest 100m / 128Mi, default 250m / 256Mi) et des bornes (min 50m / 64Mi, max 1000m / 768Mi) cohérentes avec le tableau de dimensionnement, afin qu'aucun conteneur ne puisse déclarer des ressources hors de l'enveloppe planifiée.

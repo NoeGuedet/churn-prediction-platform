@@ -31,7 +31,7 @@ minikube start --cpus=4 --memory=6144 --driver=docker
 minikube addons enable metrics-server
 
 # Déploiement complet (séance 3)
-kubectl apply -f k8s/ -n projet-NOE
+kubectl apply -f k8s/ -n projet-noe
 ```
 
 ### Tests

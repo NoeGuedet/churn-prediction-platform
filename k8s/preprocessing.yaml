@@ -27,14 +27,18 @@ spec:
             - containerPort: 8001
           env:
             - name: WORKERS
-              value: "2"
+              # 1 worker suffit : ~5-10 ms de CPU par transformation,
+              # très en dessous de 150 req/min. Chaque worker charge
+              # pandas+sklearn (~150Mi) — 2 workers dépassaient les
+              # requests (mesure kubectl top : 305Mi).
+              value: "1"
           resources:
             requests:
-              cpu: "250m"
-              memory: "256Mi"
+              cpu: "200m"
+              memory: "192Mi"
             limits:
-              cpu: "500m"
-              memory: "384Mi"
+              cpu: "400m"
+              memory: "288Mi"
           readinessProbe:
             httpGet:
               path: /health
