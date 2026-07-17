@@ -1,0 +1,39 @@
+=== kubectl top pods -n projet-noe (au repos, après warm-up) ===
+NAME                             CPU(cores)   MEMORY(bytes)   
+inference-dcf79545d-bdz2p        7m           249Mi           
+monitoring-6dcbc9797-s4p72       10m          52Mi            
+preprocessing-7cd9467d9c-4gktl   23m          152Mi           
+
+=== kubectl describe resourcequota projet-quota -n projet-noe ===
+Name:            projet-quota
+Namespace:       projet-noe
+Resource         Used   Hard
+--------         ----   ----
+limits.cpu       1300m  2500m
+limits.memory    960Mi  1536Mi
+requests.cpu     750m   2500m
+requests.memory  736Mi  1536Mi
+
+=== kubectl get all -n projet-noe (pods Running) ===
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/inference-dcf79545d-bdz2p        1/1     Running   0          97s
+pod/monitoring-6dcbc9797-s4p72       1/1     Running   0          77s
+pod/preprocessing-7cd9467d9c-4gktl   1/1     Running   0          77s
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/inference-svc       NodePort    10.109.108.4    <none>        8002:30889/TCP   24m
+service/monitoring-svc      ClusterIP   10.97.95.220    <none>        8003/TCP         24m
+service/preprocessing-svc   ClusterIP   10.103.43.160   <none>        8001/TCP         26m
+
+NAME                            READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/inference       1/1     1            1           97s
+deployment.apps/monitoring      1/1     1            1           97s
+deployment.apps/preprocessing   1/1     1            1           97s
+
+NAME                                       DESIRED   CURRENT   READY   AGE
+replicaset.apps/inference-dcf79545d        1         1         1       97s
+replicaset.apps/monitoring-6dcbc9797       1         1         1       97s
+replicaset.apps/preprocessing-7cd9467d9c   1         1         1       97s
+
+NAME                         SCHEDULE    TIMEZONE   SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/segmentation   7 * * * *   <none>     False     0        <none>          24m
