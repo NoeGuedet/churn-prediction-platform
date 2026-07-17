@@ -1,3 +1,6 @@
 pytest==9.1.1
 pytest-cov==7.1.0
 httpx==0.28.1
+# Requis pour importer le service d'inférence dans les tests
+# (installé avec --no-deps dans l'image Docker, cf. Dockerfile).
+xgboost==3.3.0

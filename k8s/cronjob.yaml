@@ -1,0 +1,29 @@
+# Modèle 3 (optionnel) : segmentation K-Means recalculée toutes les heures.
+# Ne consomme des ressources que pendant l'exécution — mais ses requests
+# s'ajoutent temporairement au quota (cf. ADR, section 5).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: segmentation
+spec:
+  schedule: "7 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: segmentation
+              image: noeguedet/orchestration-ml-segmentation:1.0.0
+              imagePullPolicy: IfNotPresent
+              resources:
+                requests:
+                  cpu: "200m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "400m"
+                  memory: "384Mi"

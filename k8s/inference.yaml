@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference
+  labels:
+    app: inference
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1   # cf. ADR section 5 : le surge (500m/512Mi) tient dans la marge du quota
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: inference
+  template:
+    metadata:
+      labels:
+        app: inference
+    spec:
+      containers:
+        - name: inference
+          image: noeguedet/orchestration-ml-inference:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8002
+          env:
+            - name: PREPROCESSING_URL
+              value: "http://preprocessing-svc:8001"
+            - name: MONITORING_URL
+              value: "http://monitoring-svc:8003"
+            - name: CHURN_THRESHOLD
+              value: "0.5"
+            - name: WORKERS
+              value: "2"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "768Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+# NodePort : seul service exposé hors du cluster (script de charge via
+# `minikube service inference-svc -n projet-NOE --url`).
+apiVersion: v1
+kind: Service
+metadata:
+  name: inference-svc
+spec:
+  type: NodePort
+  selector:
+    app: inference
+  ports:
+    - port: 8002
+      targetPort: 8002

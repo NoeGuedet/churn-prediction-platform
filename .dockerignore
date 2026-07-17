@@ -2,7 +2,8 @@
 .git
 .github
 docs
-data
+data/*
+!data/churn.csv
 tests
 scripts
 *.md

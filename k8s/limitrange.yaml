@@ -1,0 +1,21 @@
+# Bornes par conteneur + valeurs par défaut (indispensable : dès qu'un
+# quota existe, tout pod sans requests/limits déclarés est rejeté).
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: projet-limits
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "250m"
+        memory: "256Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      max:
+        cpu: "1000m"
+        memory: "768Mi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
