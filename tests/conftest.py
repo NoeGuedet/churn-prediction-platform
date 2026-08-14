@@ -10,8 +10,8 @@ sys.path.insert(0, str(ROOT))
 
 @pytest.fixture(scope="session")
 def sample_profile() -> dict:
-    """Un profil client réel issu du dataset (format identique au
-    script de charge : toutes les valeurs en string)."""
+    """A real customer profile from the dataset (same format as the
+    load script: all values as strings)."""
     with open(ROOT / "data" / "churn.csv") as f:
         row = next(iter(csv.DictReader(f)))
     row.pop("Churn")

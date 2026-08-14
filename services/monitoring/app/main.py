@@ -1,12 +1,12 @@
-"""Service de monitoring — cas 3 (churn télécom).
+"""Monitoring service — telecom churn.
 
-Enregistre les événements envoyés par le service d'inférence (requêtes,
-prédictions, latences, statuts) et expose des métriques agrégées sur
-GET /metrics : volume, latence, taux d'erreur.
+Records the events sent by the inference service (requests,
+predictions, latencies, statuses) and exposes aggregated metrics on
+GET /metrics: volume, latency, error rate.
 
-Stockage en mémoire borné (deque à taille fixe) : la consommation RAM
-du service reste constante quelle que soit la durée du stress test —
-point important sous quota strict.
+Bounded in-memory storage (fixed-size deque): the service's RAM
+consumption stays constant regardless of the stress test duration —
+an important point under a strict quota.
 """
 
 import threading

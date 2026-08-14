@@ -1,5 +1,5 @@
-"""Tests du service d'inférence : logique de routage entre les modèles
-(exigence minimale de l'énoncé) + comportement de l'endpoint /predict."""
+"""Inference service tests: routing logic between the models
+(minimum requirement of the assignment) + /predict endpoint behavior."""
 
 import httpx
 import numpy as np
@@ -15,7 +15,7 @@ client = TestClient(app)
 
 @pytest.fixture
 def mock_preprocessing(monkeypatch):
-    """Remplace l'appel HTTP au preprocessing par un vecteur fixe."""
+    """Replaces the HTTP call to preprocessing with a fixed vector."""
     response = httpx.Response(
         200,
         json={"features": [0.0] * 45},
@@ -39,23 +39,23 @@ def test_predict_above_threshold_calls_offer_model(
 ):
     _set_churn_score(monkeypatch, 0.7)
     monkeypatch.setattr(
-        inf.offer_model, "predict", lambda X: np.array(["remise_tarifaire"])
+        inf.offer_model, "predict", lambda X: np.array(["discount"])
     )
     resp = client.post("/predict", json=sample_profile)
     assert resp.status_code == 200
     body = resp.json()
     assert body["churn_probability"] == 0.7
-    assert body["recommended_offer"] == "remise_tarifaire"
+    assert body["recommended_offer"] == "discount"
 
 
 def test_predict_below_threshold_skips_offer_model(
     monkeypatch, mock_preprocessing, sample_profile
 ):
-    """En dessous du seuil, le modèle d'offre ne doit PAS être appelé."""
+    """Below the threshold, the offer model must NOT be called."""
     _set_churn_score(monkeypatch, 0.3)
 
     def fail_if_called(X):
-        raise AssertionError("offer_model ne devrait pas être appelé")
+        raise AssertionError("offer_model should not be called")
 
     monkeypatch.setattr(inf.offer_model, "predict", fail_if_called)
     resp = client.post("/predict", json=sample_profile)
@@ -65,7 +65,7 @@ def test_predict_below_threshold_skips_offer_model(
 
 def test_predict_preprocessing_down_returns_503(monkeypatch, sample_profile):
     def boom(*a, **k):
-        raise httpx.RequestError("connexion refusée")
+        raise httpx.RequestError("connection refused")
 
     monkeypatch.setattr(inf.preprocessing_client, "post", boom)
     resp = client.post("/predict", json=sample_profile)
@@ -75,7 +75,7 @@ def test_predict_preprocessing_down_returns_503(monkeypatch, sample_profile):
 def test_predict_preprocessing_error_propagated(monkeypatch, sample_profile):
     response = httpx.Response(
         422,
-        json={"detail": "Champs manquants"},
+        json={"detail": "Missing fields"},
         request=httpx.Request("POST", "http://test/transform"),
     )
     monkeypatch.setattr(
@@ -86,8 +86,8 @@ def test_predict_preprocessing_error_propagated(monkeypatch, sample_profile):
 
 
 def test_predict_integration_real_models(monkeypatch, sample_profile):
-    """Intégration : vrai preprocessor + vrais modèles, HTTP mocké
-    au niveau transport uniquement."""
+    """Integration: real preprocessor + real models, HTTP mocked
+    at the transport level only."""
     from services.preprocessing.app.main import app as prep_app
 
     prep_client = TestClient(prep_app)

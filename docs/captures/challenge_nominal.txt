@@ -1,10 +1,10 @@
-=== NIVEAU: nominal — début 13:47:10 ===
---- kubectl get pods (avant) ---
+=== LEVEL: nominal — start 13:47:10 ===
+--- kubectl get pods (before) ---
 NAME                             READY   STATUS    RESTARTS   AGE
 inference-dcf79545d-bdz2p        1/1     Running   0          16m
 monitoring-6dcbc9797-s4p72       1/1     Running   0          16m
 preprocessing-7cd9467d9c-4gktl   1/1     Running   0          16m
---- monitoring /metrics (avant) ---
+--- monitoring /metrics (before) ---
 {"uptime_s":985.0,"total_requests":1,"success_200":1,"failures":0,"error_rate_pct":0.0,"requests_last_minute":0,"latency_avg_ms":30.25,"latency_p95_ms":30.25,"latency_max_ms":30.25,"recent_events":[{"ts":1784287885.585036,"latency_ms":30.25,"status":200,"churn_probability":0.5752,"offer":"upgrade_fibre"}]}
 --- kubectl top pods @ 13:47:40 ---
 NAME                             CPU(cores)   MEMORY(bytes)   
@@ -51,34 +51,34 @@ NAME                             CPU(cores)   MEMORY(bytes)
 inference-dcf79545d-bdz2p        8m           253Mi           
 monitoring-6dcbc9797-s4p72       4m           53Mi            
 preprocessing-7cd9467d9c-4gktl   6m           152Mi           
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 customer profiles loaded from ./data/churn.csv
 [TEST] case=churn  rate=10 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
-[TEST] Début : 13:47:10
+[TEST] Start : 13:47:10
 
 =======================================================
-  RÉSULTATS  -  CHURN / NOMINAL
+  RESULTS  -  CHURN / NOMINAL
 =======================================================
-  Rate configuré    : 10 req/min
-  Durée             : 300s
-  Requêtes envoyées : 50
-  Succès (HTTP 200) : 50
-  Échecs            : 0
-  Taux de succès    : 100.0%
-  Latence moyenne   : 0.036s
-  Latence P95       : 0.04s
-  Latence max       : 0.079s
+  Configured rate    : 10 req/min
+  Duration             : 300s
+  Requests sent : 50
+  Success (HTTP 200) : 50
+  Failures            : 0
+  Success rate    : 100.0%
+  Avg latency   : 0.036s
+  P95 latency       : 0.04s
+  Max latency       : 0.079s
 =======================================================
 --- kubectl top pods @ 13:52:11 ---
 NAME                             CPU(cores)   MEMORY(bytes)   
 inference-dcf79545d-bdz2p        8m           253Mi           
 monitoring-6dcbc9797-s4p72       4m           53Mi            
 preprocessing-7cd9467d9c-4gktl   6m           152Mi           
---- monitoring /metrics (après) ---
+--- monitoring /metrics (after) ---
 {"uptime_s":1285.9,"total_requests":51,"success_200":51,"failures":0,"error_rate_pct":0.0,"requests_last_minute":9,"latency_avg_ms":17.89,"latency_p95_ms":25.66,"latency_max_ms":61.49,"recent_events":[{"ts":1784289070.6279514,"latency_ms":15.81,"status":200,"churn_probability":0.0026,"offer":"aucune_offre"},{"ts":1784289076.6306581,"latency_ms":15.49,"status":200,"churn_probability":0.1767,"offer":"aucune_offre"},{"ts":1784289082.6356235,"latency_ms":15.88,"status":200,"churn_probability":0.1836,"offer":"aucune_offre"},{"ts":1784289088.6396673,"latency_ms":15.68,"status":200,"churn_probability":0.1519,"offer":"aucune_offre"},{"ts":1784289094.637643,"latency_ms":15.31,"status":200,"churn_probability":0.3505,"offer":"aucune_offre"},{"ts":1784289100.6450438,"latency_ms":15.53,"status":200,"churn_probability":0.1256,"offer":"aucune_offre"},{"ts":1784289106.6458726,"latency_ms":14.45,"status":200,"churn_probability":0.0121,"offer":"aucune_offre"},{"ts":1784289112.6934152,"latency_ms":61.49,"status":200,"churn_probability":0.7141,"offer":"pack_support_premium"},{"ts":1784289118.649604,"latency_ms":16.02,"status":200,"churn_probability":0.3459,"offer":"aucune_offre"},{"ts":1784289124.6539774,"latency_ms":15.54,"status":200,"churn_probability":0.4723,"offer":"aucune_offre"}]}
---- kubectl get pods (après) ---
+--- kubectl get pods (after) ---
 NAME                             READY   STATUS    RESTARTS   AGE
 inference-dcf79545d-bdz2p        1/1     Running   0          21m
 monitoring-6dcbc9797-s4p72       1/1     Running   0          21m
 preprocessing-7cd9467d9c-4gktl   1/1     Running   0          21m
-=== FIN nominal — 13:52:11 ===
+=== END nominal — 13:52:11 ===

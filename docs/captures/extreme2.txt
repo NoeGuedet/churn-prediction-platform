@@ -5,23 +5,23 @@ inference-dcf79545d-bdz2p        1/1   Running     0     103m
 monitoring-6dcbc9797-s4p72       1/1   Running     0     102m
 preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     53m
 segmentation-29738227-h6vjx      0/1   Completed   0     6m36s
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 customer profiles loaded from ./data/churn.csv
 [TEST] case=churn  rate=2000 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
-[TEST] Début : 15:13:37
+[TEST] Start : 15:13:37
 
 =======================================================
-  RÉSULTATS  -  CHURN / EXTREME (RATE=2000)
+  RESULTS  -  CHURN / EXTREME (RATE=2000)
 =======================================================
-  Rate configuré    : 2000 req/min
-  Durée             : 300s
-  Requêtes envoyées : 8903
-  Succès (HTTP 200) : 8903
-  Échecs            : 0
-  Taux de succès    : 100.0%
-  Latence moyenne   : 0.012s
-  Latence P95       : 0.015s
-  Latence max       : 0.028s
+  Configured rate    : 2000 req/min
+  Duration             : 300s
+  Requests sent : 8903
+  Success (HTTP 200) : 8903
+  Failures            : 0
+  Success rate    : 100.0%
+  Avg latency   : 0.012s
+  P95 latency       : 0.015s
+  Max latency       : 0.028s
 =======================================================
 --- kubectl top pods (fin de palier) ---
 NAME                             CPU(cores)   MEMORY(bytes)   
@@ -41,23 +41,23 @@ inference-dcf79545d-bdz2p        1/1   Running     0     108m
 monitoring-6dcbc9797-s4p72       1/1   Running     0     107m
 preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     58m
 segmentation-29738227-h6vjx      0/1   Completed   0     11m
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 customer profiles loaded from ./data/churn.csv
 [TEST] case=churn  rate=2500 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
-[TEST] Début : 15:18:37
+[TEST] Start : 15:18:37
 
 =======================================================
-  RÉSULTATS  -  CHURN / EXTREME (RATE=2500)
+  RESULTS  -  CHURN / EXTREME (RATE=2500)
 =======================================================
-  Rate configuré    : 2500 req/min
-  Durée             : 300s
-  Requêtes envoyées : 10834
-  Succès (HTTP 200) : 10834
-  Échecs            : 0
-  Taux de succès    : 100.0%
-  Latence moyenne   : 0.011s
-  Latence P95       : 0.014s
-  Latence max       : 0.033s
+  Configured rate    : 2500 req/min
+  Duration             : 300s
+  Requests sent : 10834
+  Success (HTTP 200) : 10834
+  Failures            : 0
+  Success rate    : 100.0%
+  Avg latency   : 0.011s
+  P95 latency       : 0.014s
+  Max latency       : 0.033s
 =======================================================
 --- kubectl top pods (fin de palier) ---
 NAME                             CPU(cores)   MEMORY(bytes)   
@@ -77,23 +77,23 @@ inference-dcf79545d-bdz2p        1/1   Running     0     113m
 monitoring-6dcbc9797-s4p72       1/1   Running     0     112m
 preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     63m
 segmentation-29738227-h6vjx      0/1   Completed   0     16m
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 customer profiles loaded from ./data/churn.csv
 [TEST] case=churn  rate=3000 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
-[TEST] Début : 15:23:37
+[TEST] Start : 15:23:37
 
 =======================================================
-  RÉSULTATS  -  CHURN / EXTREME (RATE=3000)
+  RESULTS  -  CHURN / EXTREME (RATE=3000)
 =======================================================
-  Rate configuré    : 3000 req/min
-  Durée             : 300s
-  Requêtes envoyées : 12638
-  Succès (HTTP 200) : 12638
-  Échecs            : 0
-  Taux de succès    : 100.0%
-  Latence moyenne   : 0.01s
-  Latence P95       : 0.013s
-  Latence max       : 0.05s
+  Configured rate    : 3000 req/min
+  Duration             : 300s
+  Requests sent : 12638
+  Success (HTTP 200) : 12638
+  Failures            : 0
+  Success rate    : 100.0%
+  Avg latency   : 0.01s
+  P95 latency       : 0.013s
+  Max latency       : 0.05s
 =======================================================
 --- kubectl top pods (fin de palier) ---
 NAME                             CPU(cores)   MEMORY(bytes)   

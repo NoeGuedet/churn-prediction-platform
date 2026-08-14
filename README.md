@@ -1,95 +1,126 @@
-# Orchestration ML — Projet de mise en production sous contrainte
+# Churn Prediction Platform
 
-## Déploiement
+End-to-end ML platform for telecom churn prediction: a multi-service FastAPI pipeline engineered to run under a strict Kubernetes resource quota, with a Gradio demo UI, conditional model routing, off-critical-path monitoring and a full load-test harness.
 
-### Option A — Docker Compose (local, sans Kubernetes)
+[![CI](https://github.com/NoeGuedet/churn-prediction-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/NoeGuedet/churn-prediction-platform/actions/workflows/ci.yml)
+![Python 3.14](https://img.shields.io/badge/python-3.14-blue)
+![Coverage 98%](https://img.shields.io/badge/coverage-98%25-brightgreen)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
+> This project started as a school assignment on ML orchestration under resource constraints, and was polished into a portfolio piece: translated to English, extended with a web UI and hardened for public deployment.
+
+**[Live demo](https://churn-predictions.noeguedet.fr)** — try the model with a random customer profile.
+
+![Gradio demo UI](docs/images/webui_screenshot.png)
+
+## What it does
+
+Given a telecom customer profile, the platform predicts a churn probability with an XGBoost model. If the score exceeds a configurable threshold, a second model (RandomForest) recommends a retention offer among 5 categories. Every request is logged asynchronously to a monitoring service exposing volume, latency and error-rate metrics.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    U[User / load test] --> W[webui<br/>Gradio :7860]
+    W -->|POST /predict| I[inference :8002<br/>XGBoost + RandomForest]
+    U -->|POST /predict| I
+    I -->|POST /transform| P[preprocessing :8001<br/>45-feature vector]
+    I -.->|async log, BackgroundTasks| M[monitoring :8003<br/>metrics]
+    S[segmentation CronJob<br/>K-Means, hourly] -.->|batch, K8s only| P
+```
+
+- **preprocessing** — transforms a raw customer profile into the 45-feature vector expected by the models (compiled version of the fitted sklearn pipeline, ~50× faster per row).
+- **inference** — scores churn, conditionally routes to the offer model, logs off the critical path.
+- **monitoring** — in-memory, bounded event store; exposes `GET /metrics`.
+- **webui** — thin Gradio client of the inference API.
+- **segmentation** — hourly K-Means batch job (Kubernetes CronJob only).
+
+## Key engineering points
+
+- **Designed for a hard quota**: the whole platform fits in **2500m CPU / 1.5Gi memory** (K8s ResourceQuota + LimitRange). Sizing was driven by `kubectl top` measurements, not guesses — see [ADR.md](ADR.md).
+- **Off-critical-path monitoring**: predictions are logged via FastAPI `BackgroundTasks`; a monitoring outage cannot slow down or break a prediction.
+- **Conditional model routing**: the offer model is only invoked when the churn score crosses the threshold (mock-verified in tests).
+- **Compiled preprocessing**: the fitted `ColumnTransformer` is re-implemented as dict lookups + numpy at service startup, cutting per-request transform cost from ~10 ms to ~0.2 ms, with strict equivalence proven by test.
+- **Battle-tested under load**: 12,638 HTTP 200 in 5 minutes at 3000 req/min, 100% success, zero pod restarts — full report in [STRESS_TEST.md](STRESS_TEST.md).
+- **Kubernetes / Docker Compose parity**: the same images run in both, with requests/limits mirroring each other.
+
+## Quickstart (Docker Compose)
 
 ```bash
-git clone git@github.com:NoeGuedet/orchestration_ml.git
-cd orchestration_ml
+git clone git@github.com:NoeGuedet/churn-prediction-platform.git
+cd churn-prediction-platform
 docker compose up --build -d
 ```
 
-Vérification :
+- Web UI: http://localhost:7860
+- Inference API: `curl http://localhost:8002/health`
+- Metrics: `curl http://localhost:8003/metrics`
+
+## Kubernetes (minikube)
 
 ```bash
-curl http://localhost:8002/health          # inference
-curl http://localhost:8003/metrics         # monitoring
-```
-
-### Option B — Kubernetes (minikube)
-
-Prérequis :
-
-- macOS avec Docker (daemon actif)
-- minikube (`brew install minikube`)
-- kubectl (`brew install kubectl`)
-
-```bash
-# Démarrer le cluster (une seule fois)
 minikube start --cpus=4 --memory=6144 --driver=docker
 minikube addons enable metrics-server
-
-# Déploiement complet (séance 3)
-kubectl apply -f k8s/ -n projet-noe
+kubectl apply -f k8s/ -n churn-prediction-platform
+kubectl port-forward svc/inference-svc 8002:8002 -n churn-prediction-platform &
 ```
 
-Note : sur un cluster vierge, si certaines ressources signalent `namespace not found` (le namespace est en cours d'initialisation), ré-exécuter la même commande — elle est idempotente.
+Note: on a fresh cluster, if some resources report `namespace not found` (the namespace is still initializing), simply re-run the same command — it is idempotent.
 
-### Exposer le service d'inférence
+## Load testing
 
 ```bash
-# Option 1 — minikube service (garde le terminal ouvert)
-minikube service inference-svc -n projet-noe --url
-
-# Option 2 — port-forward (utilisé pour nos tests)
-kubectl port-forward svc/inference-svc 8002:8002 -n projet-noe &
-# URL : http://localhost:8002/predict
+pip install -r requirements-dev.txt
+python scripts/load_test.py --level stress --url http://localhost:8002/predict
+# levels: nominal (10/min), charge (50/min), stress (150/min), extreme (--rate N)
 ```
 
-### Test de charge
+Live resource usage during a run:
 
 ```bash
-pip install requests
-python scripts/load_test.py --case churn --level nominal --url http://localhost:8002/predict
-# niveaux : nominal (10/min), charge (50/min), stress (150/min), extreme (--rate libre)
+kubectl top pods -n churn-prediction-platform
+kubectl port-forward svc/monitoring-svc 8003:8003 -n churn-prediction-platform &
+curl http://localhost:8003/metrics
 ```
 
-Métriques en direct pendant le test :
-
-```bash
-kubectl top pods -n projet-noe                                  # conso réelle
-kubectl port-forward svc/monitoring-svc 8003:8003 -n projet-noe &
-curl http://localhost:8003/metrics                              # volume, latence, taux d'erreur
-```
-
-### Tests
+## Tests
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt -r services/preprocessing/requirements.txt -r services/inference/requirements.txt
-pytest            # couverture >= 80 % exigée
+pytest            # coverage >= 80% enforced (currently ~98%)
 ```
 
-## Présentation
-
-Pipeline ML multi-services déployé sur Kubernetes (minikube) sous quota de ressources non négociable :
-
-- **preprocessing** : réception et préparation des données brutes
-- **inference** : API REST de prédiction (modèles entraînés pour le projet)
-- **monitoring** : enregistrement des requêtes/prédictions, métriques (volume, latence, taux d'erreur)
-
-## Structure du repo
+## Project structure
 
 ```
-├── .github/workflows/   # Pipeline CI/CD
-├── scripts/             # Script de charge officiel (load_test.py)
-├── data/                # Données du script de charge
-├── models/              # Artefacts des modèles + fiches de validation
-├── services/            # preprocessing / inference / monitoring
-├── k8s/                 # Manifests Kubernetes (quota, limitrange, services)
-├── tests/               # Tests (couverture ≥ 80 %)
-├── docs/                # Documents du cours (PDF + conversions markdown)
+├── .github/workflows/   # CI/CD: tests (coverage gate) then multi-arch image builds
+├── services/            # preprocessing / inference / monitoring / webui / segmentation
+├── models/              # Trained artifacts + validation sheets (models/README.md)
+├── k8s/                 # Kubernetes manifests (namespace, quota, limitrange, cronjob)
+├── scripts/             # train_models.py, load_test.py, analyze_threshold.py
+├── tests/               # pytest suite (coverage >= 80%)
+├── data/                # IBM Telco churn dataset (public)
+├── docs/                # Benchmark captures and figures
 ├── ADR.md               # Architecture Decision Record
-└── README.md
+├── STRESS_TEST.md       # Load & stress test report
+├── PROJECT_NOTES.md     # In-depth engineering notes (benchmarks, incidents, lessons)
+└── DEPLOYMENT.md        # Production deployment guide (VM + Caddy)
 ```
+
+## Documentation
+
+- [ADR.md](ADR.md) — why the architecture is shaped this way (quota-driven decisions)
+- [STRESS_TEST.md](STRESS_TEST.md) — load test methodology and results
+- [PROJECT_NOTES.md](PROJECT_NOTES.md) — deep dive: concepts, sizing math, incidents and lessons learned
+- [DEPLOYMENT.md](DEPLOYMENT.md) — deploy on your own server with Docker Compose + Caddy
+- [models/README.md](models/README.md) — model validation sheets (churn AUC 0.838, offer accuracy 0.928)
+
+## Credits
+
+- Dataset: [IBM Telco Customer Churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) (public, fictional data).
+- The load test script in `scripts/load_test.py` is an English, churn-focused rewrite of a generic load-testing script originally provided as coursework material.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

@@ -1,0 +1,41 @@
+# Production override — use together with the base file:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Only the web UI is published (port 7860). Your reverse proxy should
+# forward to it. The inference API, preprocessing and monitoring are
+# NOT published: they stay reachable only inside the compose network.
+services:
+  preprocessing:
+    ports: !reset []
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: 288M
+
+  inference:
+    ports: !reset []
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.7"
+          memory: 544M
+
+  monitoring:
+    ports: !reset []
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 128M
+
+  webui:
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M

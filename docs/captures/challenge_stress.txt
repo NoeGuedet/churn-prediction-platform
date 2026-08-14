@@ -1,10 +1,10 @@
-=== NIVEAU: stress — début 13:57:12 ===
---- kubectl get pods (avant) ---
+=== LEVEL: stress — start 13:57:12 ===
+--- kubectl get pods (before) ---
 NAME                             READY   STATUS    RESTARTS   AGE
 inference-dcf79545d-bdz2p        1/1     Running   0          26m
 monitoring-6dcbc9797-s4p72       1/1     Running   0          26m
 preprocessing-7cd9467d9c-4gktl   1/1     Running   0          26m
---- monitoring /metrics (avant) ---
+--- monitoring /metrics (before) ---
 {"uptime_s":1587.0,"total_requests":301,"success_200":301,"failures":0,"error_rate_pct":0.0,"requests_last_minute":49,"latency_avg_ms":16.14,"latency_p95_ms":20.59,"latency_max_ms":61.49,"recent_events":[{"ts":1784289420.188512,"latency_ms":22.8,"status":200,"churn_probability":0.5908,"offer":"pack_support_premium"},{"ts":1784289421.3819704,"latency_ms":15.39,"status":200,"churn_probability":0.5314,"offer":"pack_support_premium"},{"ts":1784289422.5825534,"latency_ms":15.11,"status":200,"churn_probability":0.4644,"offer":"aucune_offre"},{"ts":1784289423.787853,"latency_ms":15.73,"status":200,"churn_probability":0.1115,"offer":"aucune_offre"},{"ts":1784289424.9770932,"latency_ms":8.94,"status":200,"churn_probability":0.0025,"offer":"aucune_offre"},{"ts":1784289426.18979,"latency_ms":16.2,"status":200,"churn_probability":0.3645,"offer":"aucune_offre"},{"ts":1784289427.39481,"latency_ms":15.54,"status":200,"churn_probability":0.189,"offer":"aucune_offre"},{"ts":1784289428.5978196,"latency_ms":14.63,"status":200,"churn_probability":0.0103,"offer":"aucune_offre"},{"ts":1784289429.8008947,"latency_ms":19.1,"status":200,"churn_probability":0.8259,"offer":"pack_support_premium"},{"ts":1784289431.00007,"latency_ms":14.39,"status":200,"churn_probability":0.18,"offer":"aucune_offre"}]}
 --- kubectl top pods @ 13:57:42 ---
 NAME                             CPU(cores)   MEMORY(bytes)   
@@ -51,34 +51,34 @@ NAME                             CPU(cores)   MEMORY(bytes)
 inference-dcf79545d-bdz2p        22m          255Mi           
 monitoring-6dcbc9797-s4p72       6m           53Mi            
 preprocessing-7cd9467d9c-4gktl   33m          153Mi           
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 customer profiles loaded from ./data/churn.csv
 [TEST] case=churn  rate=150 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
-[TEST] Début : 13:57:12
+[TEST] Start : 13:57:12
 
 =======================================================
-  RÉSULTATS  -  CHURN / STRESS
+  RESULTS  -  CHURN / STRESS
 =======================================================
-  Rate configuré    : 150 req/min
-  Durée             : 300s
-  Requêtes envoyées : 745
-  Succès (HTTP 200) : 744
-  Échecs            : 1
-  Taux de succès    : 99.9%
-  Latence moyenne   : 0.033s
-  Latence P95       : 0.039s
-  Latence max       : 0.042s
+  Configured rate    : 150 req/min
+  Duration             : 300s
+  Requests sent : 745
+  Success (HTTP 200) : 744
+  Failures            : 1
+  Success rate    : 99.9%
+  Avg latency   : 0.033s
+  P95 latency       : 0.039s
+  Max latency       : 0.042s
 =======================================================
 --- kubectl top pods @ 14:02:13 ---
 NAME                             CPU(cores)   MEMORY(bytes)   
 inference-dcf79545d-bdz2p        22m          255Mi           
 monitoring-6dcbc9797-s4p72       6m           53Mi            
 preprocessing-7cd9467d9c-4gktl   33m          153Mi           
---- monitoring /metrics (après) ---
+--- monitoring /metrics (after) ---
 {"uptime_s":1887.8,"total_requests":1045,"success_200":1045,"failures":0,"error_rate_pct":0.0,"requests_last_minute":147,"latency_avg_ms":15.51,"latency_p95_ms":20.41,"latency_max_ms":61.49,"recent_events":[{"ts":1784289728.7552392,"latency_ms":13.28,"status":200,"churn_probability":0.1651,"offer":"aucune_offre"},{"ts":1784289729.1596606,"latency_ms":13.33,"status":200,"churn_probability":0.4242,"offer":"aucune_offre"},{"ts":1784289729.5657287,"latency_ms":13.46,"status":200,"churn_probability":0.0818,"offer":"aucune_offre"},{"ts":1784289729.9638455,"latency_ms":11.48,"status":200,"churn_probability":0.0699,"offer":"aucune_offre"},{"ts":1784289730.3725677,"latency_ms":14.15,"status":200,"churn_probability":0.0555,"offer":"aucune_offre"},{"ts":1784289730.7758307,"latency_ms":14.06,"status":200,"churn_probability":0.0751,"offer":"aucune_offre"},{"ts":1784289731.178866,"latency_ms":13.81,"status":200,"churn_probability":0.3192,"offer":"aucune_offre"},{"ts":1784289731.5884256,"latency_ms":18.96,"status":200,"churn_probability":0.5171,"offer":"remise_tarifaire"},{"ts":1784289731.9806716,"latency_ms":11.56,"status":200,"churn_probability":0.0654,"offer":"aucune_offre"},{"ts":1784289732.386878,"latency_ms":13.79,"status":200,"churn_probability":0.0107,"offer":"aucune_offre"}]}
---- kubectl get pods (après) ---
+--- kubectl get pods (after) ---
 NAME                             READY   STATUS    RESTARTS   AGE
 inference-dcf79545d-bdz2p        1/1     Running   0          31m
 monitoring-6dcbc9797-s4p72       1/1     Running   0          31m
 preprocessing-7cd9467d9c-4gktl   1/1     Running   0          31m
-=== FIN stress — 14:02:13 ===
+=== END stress — 14:02:13 ===

@@ -1,9 +1,9 @@
-"""Job de segmentation K-Means — exécuté par le CronJob Kubernetes.
+"""K-Means segmentation job — run by the Kubernetes CronJob.
 
-Recharge le dataset, applique le preprocessor partagé, recalcule la
-segmentation K-Means et journalise le résultat sur stdout (consultable
-via `kubectl logs job/...`). Conçu pour une exécution courte et ponctuelle :
-les ressources ne sont consommées que pendant le run (cf. ADR, section 5).
+Reloads the dataset, applies the shared preprocessor, recomputes the
+K-Means segmentation and logs the result to stdout (viewable via
+`kubectl logs job/...`). Designed for short, one-off runs: resources
+are only consumed during the run (see ADR, section 5).
 """
 
 from pathlib import Path
@@ -30,8 +30,8 @@ def main() -> None:
     silhouette = silhouette_score(X, labels, sample_size=2000, random_state=42)
     sizes = pd.Series(labels).value_counts().sort_index().to_dict()
 
-    print(f"[SEGMENTATION] {len(X)} clients segmentés en 4 clusters")
-    print(f"[SEGMENTATION] silhouette={silhouette:.3f}  tailles={sizes}")
+    print(f"[SEGMENTATION] {len(X)} customers segmented into 4 clusters")
+    print(f"[SEGMENTATION] silhouette={silhouette:.3f}  sizes={sizes}")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-# Bornes par conteneur + valeurs par défaut (indispensable : dès qu'un
-# quota existe, tout pod sans requests/limits déclarés est rejeté).
+# Per-container bounds + default values (required: as soon as a quota
+# exists, any pod without declared requests/limits is rejected).
 apiVersion: v1
 kind: LimitRange
 metadata:
