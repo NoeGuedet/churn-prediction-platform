@@ -1,5 +1,5 @@
-"""Tests du service de monitoring : enregistrement, métriques agrégées
-et bornage du stockage en mémoire."""
+"""Monitoring service tests: event recording, aggregated metrics
+and bounded in-memory storage."""
 
 import time
 
@@ -36,8 +36,8 @@ def test_log_then_metrics():
 
 
 def test_storage_is_bounded():
-    """Le stockage est borné : la RAM du service reste constante même
-    après des millions de requêtes loguées."""
+    """Storage is bounded: the service's RAM stays constant even
+    after millions of logged requests."""
     assert events.maxlen == MAX_EVENTS
 
 

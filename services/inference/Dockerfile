@@ -1,7 +1,7 @@
 FROM python:3.14-slim
 
-# libgomp1 : runtime OpenMP requis par XGBoost sur Debian
-# (équivalent de libomp sur macOS).
+# libgomp1: OpenMP runtime required by XGBoost on Debian
+# (equivalent of libomp on macOS).
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/*
@@ -9,9 +9,9 @@ RUN apt-get update \
 WORKDIR /app
 
 COPY services/inference/requirements.txt .
-# xgboost avec --no-deps : son wheel Linux dépend de librairies nvidia/CUDA
-# (~400 Mo) inutiles pour de l'inférence CPU. numpy/scipy (ses vraies
-# dépendances) sont déjà fournies par scikit-learn.
+# xgboost with --no-deps: its Linux wheel depends on nvidia/CUDA
+# libraries (~400 MB) that are useless for CPU inference. numpy/scipy
+# (its real dependencies) are already provided by scikit-learn.
 RUN pip install --no-cache-dir -r requirements.txt \
     && pip install --no-cache-dir --no-deps xgboost==3.3.0
 

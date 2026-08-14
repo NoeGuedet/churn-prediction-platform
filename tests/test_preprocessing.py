@@ -1,5 +1,5 @@
-"""Tests du service de preprocessing : fonctions de transformation
-(exigence minimale de l'énoncé) + endpoint /transform."""
+"""Preprocessing service tests: transformation functions
+(minimum requirement of the assignment) + /transform endpoint."""
 
 import numpy as np
 import pandas as pd
@@ -23,15 +23,15 @@ def test_prepare_frame_coerces_numeric_strings(sample_profile):
 
 
 def test_prepare_frame_handles_empty_totalcharges(sample_profile):
-    """Cas connu du dataset Telco : TotalCharges vide (' ') pour les
-    clients à tenure 0 — doit devenir 0.0, pas lever d'erreur."""
+    """Known Telco dataset edge case: empty TotalCharges (' ') for
+    customers with tenure 0 — must become 0.0, not raise an error."""
     profile = {**sample_profile, "TotalCharges": " "}
     frame = prepare_frame(pd.DataFrame([profile]))
     assert frame["TotalCharges"].iloc[0] == 0.0
 
 
 def test_prepare_frame_column_order_and_selection(sample_profile):
-    profile = {**sample_profile, "ChampInconnu": "x"}
+    profile = {**sample_profile, "UnknownField": "x"}
     frame = prepare_frame(pd.DataFrame([profile]))
     assert list(frame.columns) == ALL_FEATURES
 
@@ -51,8 +51,8 @@ def test_transform_ok(sample_profile):
 
 
 def test_compiled_matches_sklearn_transformer():
-    """Equivalence stricte entre le CompiledPreprocessor et le
-    ColumnTransformer d'origine, sur 200 profils réels + cas limites."""
+    """Strict equivalence between the CompiledPreprocessor and the
+    original ColumnTransformer, on 200 real profiles + edge cases."""
     import csv
     import joblib
 
@@ -62,9 +62,9 @@ def test_compiled_matches_sklearn_transformer():
     for row in rows:
         row.pop("Churn", None)
         row.pop("customerID", None)
-    # Cas limites : TotalCharges vide + catégorie jamais vue à l'entraînement.
+    # Edge cases: empty TotalCharges + a category never seen during training.
     rows[0] = {**rows[0], "TotalCharges": " "}
-    rows[1] = {**rows[1], "Contract": "CategorieInconnue"}
+    rows[1] = {**rows[1], "Contract": "UnknownCategory"}
     for row in rows:
         expected = original.transform(prepare_frame(pd.DataFrame([row])))[0]
         assert np.allclose(compiled.transform_row(row), expected)
