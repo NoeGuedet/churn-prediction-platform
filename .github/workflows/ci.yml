@@ -30,7 +30,8 @@ jobs:
           pip install -r requirements-dev.txt \
                       -r services/preprocessing/requirements.txt \
                       -r services/inference/requirements.txt \
-                      -r services/monitoring/requirements.txt
+                      -r services/monitoring/requirements.txt \
+                      -r services/webui/requirements.txt
 
       # pytest.ini enforces --cov-fail-under=80: the job fails below 80%.
       - name: Tests (coverage >= 80%, blocking)
@@ -45,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [preprocessing, inference, monitoring, segmentation]
+        service: [preprocessing, inference, monitoring, segmentation, webui]
     steps:
       - uses: actions/checkout@v4
 

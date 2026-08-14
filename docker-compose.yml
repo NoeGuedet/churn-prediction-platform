@@ -30,3 +30,15 @@ services:
     image: churn-prediction-platform/monitoring:1.0.0
     ports:
       - "8003:8003"
+
+  webui:
+    build:
+      context: .
+      dockerfile: services/webui/Dockerfile
+    image: churn-prediction-platform/webui:1.0.0
+    ports:
+      - "7860:7860"
+    environment:
+      INFERENCE_URL: http://inference:8002
+    depends_on:
+      - inference
