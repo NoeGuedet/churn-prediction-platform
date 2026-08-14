@@ -179,7 +179,10 @@ def build_ui() -> gr.Blocks:
             "The model scores a customer's risk of leaving, and when the "
             "score exceeds the decision threshold, a retention offer is "
             "recommended. The form is pre-filled with a random customer "
-            "from the dataset."
+            "from the dataset.\n\n"
+            "Source code: "
+            "[github.com/NoeGuedet/churn-prediction-platform]"
+            "(https://github.com/NoeGuedet/churn-prediction-platform)"
         )
         inputs = []
         with gr.Accordion("Customer info", open=True):
