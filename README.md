@@ -9,7 +9,7 @@ End-to-end ML platform for telecom churn prediction: a multi-service FastAPI pip
 
 > This project started as a school assignment on ML orchestration under resource constraints, and was polished into a portfolio piece: translated to English, extended with a web UI and hardened for public deployment.
 
-**[Live demo](https://churn-predictions.noeguedet.fr)** — try the model with a random customer profile.
+**[Live demo](https://churn-prediction.noeguedet.fr)** — try the model with a random customer profile.
 
 ![Gradio demo UI](docs/images/webui_screenshot.png)
 
