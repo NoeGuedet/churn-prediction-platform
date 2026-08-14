@@ -36,11 +36,11 @@ ALL_FEATURES = NUMERIC_COLS + CATEGORICAL_COLS
 
 # The 5 fictitious offer categories (case 3).
 OFFER_LABELS = [
-    "remise_tarifaire",
-    "pack_support_premium",
-    "upgrade_fibre",
-    "engagement_fidelite",
-    "pack_streaming",
+    "discount",
+    "premium_support",
+    "fiber_upgrade",
+    "loyalty_contract",
+    "streaming_pack",
 ]
 
 # Offer returned when the churn score does not exceed the threshold.

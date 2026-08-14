@@ -16,7 +16,7 @@ def _event(status: int, latency_ms: float) -> dict:
         "latency_ms": latency_ms,
         "status": status,
         "churn_probability": 0.42,
-        "offer": "remise_tarifaire",
+        "offer": "discount",
     }
 
 

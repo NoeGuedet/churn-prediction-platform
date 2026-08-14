@@ -39,13 +39,13 @@ def test_predict_above_threshold_calls_offer_model(
 ):
     _set_churn_score(monkeypatch, 0.7)
     monkeypatch.setattr(
-        inf.offer_model, "predict", lambda X: np.array(["remise_tarifaire"])
+        inf.offer_model, "predict", lambda X: np.array(["discount"])
     )
     resp = client.post("/predict", json=sample_profile)
     assert resp.status_code == 200
     body = resp.json()
     assert body["churn_probability"] == 0.7
-    assert body["recommended_offer"] == "remise_tarifaire"
+    assert body["recommended_offer"] == "discount"
 
 
 def test_predict_below_threshold_skips_offer_model(

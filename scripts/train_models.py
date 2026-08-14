@@ -57,16 +57,16 @@ def assign_offer(row: pd.Series, rng: np.random.Generator) -> str:
     if rng.random() < NOISE_RATE:
         return OFFER_LABELS[rng.integers(len(OFFER_LABELS))]
     if row["MonthlyCharges"] > 90:
-        return "remise_tarifaire"
+        return "discount"
     if row["InternetService"] == "DSL":
-        return "upgrade_fibre"
+        return "fiber_upgrade"
     if row["TechSupport"] == "No" and row["InternetService"] != "No":
-        return "pack_support_premium"
+        return "premium_support"
     if row["Contract"] == "Month-to-month" and row["tenure"] < 12:
-        return "engagement_fidelite"
+        return "loyalty_contract"
     if row["StreamingTV"] == "Yes" or row["StreamingMovies"] == "Yes":
-        return "pack_streaming"
-    return "engagement_fidelite"
+        return "streaming_pack"
+    return "loyalty_contract"
 
 
 def measure_inference_time(model, X_sample: np.ndarray, n: int = 1000) -> float:
