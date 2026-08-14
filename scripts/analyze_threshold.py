@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Analyse du seuil de décision du modèle de churn.
+"""Analysis of the churn model decision threshold.
 
-Trace precision / recall / F1 en fonction du seuil appliqué au score
-XGBoost, sur le même split de test que l'entraînement (random_state=42).
-Produit docs/images/seuil_churn.png (utilisé dans les slides) et affiche
-le seuil optimal au sens du F1.
+Plots precision / recall / F1 as a function of the threshold applied to
+the XGBoost score, on the same test split as training (random_state=42).
+Produces docs/images/churn_threshold.png (used in the slides) and prints
+the F1-optimal threshold.
 
-Usage : .venv/bin/python scripts/analyze_threshold.py
+Usage: .venv/bin/python scripts/analyze_threshold.py
 """
 
 import sys
@@ -26,7 +26,7 @@ from services.preprocessing.app.features import prepare_frame  # noqa: E402
 
 DATA_PATH = Path(__file__).parent.parent / "data" / "churn.csv"
 MODELS_DIR = Path(__file__).parent.parent / "models"
-OUT_PATH = Path(__file__).parent.parent / "docs" / "images" / "seuil_churn.png"
+OUT_PATH = Path(__file__).parent.parent / "docs" / "images" / "churn_threshold.png"
 RANDOM_STATE = 42
 DEPLOYED_THRESHOLD = 0.5
 
@@ -55,34 +55,34 @@ def main() -> None:
     best_idx = int(np.argmax(f1s))
     best_t, best_f1 = thresholds[best_idx], f1s[best_idx]
     deployed_f1 = f1_score(y_test, (proba >= DEPLOYED_THRESHOLD).astype(int))
-    print(f"Seuil déployé {DEPLOYED_THRESHOLD} : F1={deployed_f1:.3f}")
+    print(f"Deployed threshold {DEPLOYED_THRESHOLD}: F1={deployed_f1:.3f}")
     print(
-        f"Seuil optimal F1 : {best_t:.2f} "
+        f"F1-optimal threshold: {best_t:.2f} "
         f"(F1={best_f1:.3f}, precision={precisions[best_idx]:.3f}, "
         f"recall={recalls[best_idx]:.3f})"
     )
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(thresholds, precisions, label="Précision", linewidth=2)
-    ax.plot(thresholds, recalls, label="Rappel", linewidth=2)
+    ax.plot(thresholds, precisions, label="Precision", linewidth=2)
+    ax.plot(thresholds, recalls, label="Recall", linewidth=2)
     ax.plot(thresholds, f1s, label="F1", linewidth=2)
     ax.axvline(
         DEPLOYED_THRESHOLD, color="gray", linestyle="--",
-        label=f"Seuil déployé ({DEPLOYED_THRESHOLD})",
+        label=f"Deployed threshold ({DEPLOYED_THRESHOLD})",
     )
     ax.axvline(
         best_t, color="green", linestyle=":",
-        label=f"Optimum F1 ({best_t:.2f})",
+        label=f"F1 optimum ({best_t:.2f})",
     )
-    ax.set_xlabel("Seuil de décision (score de churn)")
-    ax.set_ylabel("Métrique")
-    ax.set_title("Churn XGBoost — métriques en fonction du seuil (split test)")
+    ax.set_xlabel("Decision threshold (churn score)")
+    ax.set_ylabel("Metric")
+    ax.set_title("Churn XGBoost — metrics vs threshold (test split)")
     ax.legend()
     ax.grid(alpha=0.3)
     fig.tight_layout()
     fig.savefig(OUT_PATH, dpi=150)
-    print(f"Graphique sauvegardé : {OUT_PATH}")
+    print(f"Plot saved: {OUT_PATH}")
 
 
 if __name__ == "__main__":

@@ -4,3 +4,6 @@ httpx==0.28.1
 # Requis pour importer le service d'inférence dans les tests
 # (installé avec --no-deps dans l'image Docker, cf. Dockerfile).
 xgboost==3.3.0
+# Requis par les scripts (load_test.py, analyze_threshold.py).
+requests==2.34.2
+matplotlib==3.11.1

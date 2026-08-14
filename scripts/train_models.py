@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Entraînement des trois modèles du cas 3 (churn télécom).
+"""Training of the three models for the telecom churn use case.
 
-Produit les artefacts versionnés dans models/ :
-  - preprocessor.pkl  : ColumnTransformer fitted (partagé par tous les modèles)
-  - churn_model.pkl   : XGBoost binaire, score de churn entre 0 et 1
-  - offer_model.pkl   : RandomForest multiclasses, recommandation d'offre
-  - kmeans_model.pkl  : K-Means de segmentation (utilisé par le CronJob)
+Produces the versioned artifacts in models/:
+  - preprocessor.pkl  : fitted ColumnTransformer (shared by all models)
+  - churn_model.pkl   : binary XGBoost, churn score between 0 and 1
+  - offer_model.pkl   : multiclass RandomForest, offer recommendation
+  - kmeans_model.pkl  : segmentation K-Means (used by the CronJob)
 
-Les métriques affichées en fin d'exécution sont à reporter dans
-models/README.md (fiches de validation).
+The metrics printed at the end of the run should be reported in
+models/README.md (validation sheets).
 
-Usage : .venv/bin/python scripts/train_models.py
+Usage: .venv/bin/python scripts/train_models.py
 """
 
 import sys
@@ -49,10 +49,10 @@ NOISE_RATE = 0.10
 
 
 def assign_offer(row: pd.Series, rng: np.random.Generator) -> str:
-    """Règle métier fictive attribuant une offre à un profil client.
+    """Fictional business rule assigning an offer to a customer profile.
 
-    Sert à générer les labels synthétiques du modèle de recommandation.
-    10 % de bruit pour que le problème reste apprenable mais non trivial.
+    Used to generate the synthetic labels of the recommendation model.
+    10% noise so the problem remains learnable but non-trivial.
     """
     if rng.random() < NOISE_RATE:
         return OFFER_LABELS[rng.integers(len(OFFER_LABELS))]
@@ -70,7 +70,7 @@ def assign_offer(row: pd.Series, rng: np.random.Generator) -> str:
 
 
 def measure_inference_time(model, X_sample: np.ndarray, n: int = 1000) -> float:
-    """Temps moyen d'inférence par ligne, en millisecondes."""
+    """Average inference time per row, in milliseconds."""
     row = X_sample[[0]]
     for _ in range(10):  # warmup
         model.predict_proba(row)
@@ -84,13 +84,13 @@ def main() -> None:
     rng = np.random.default_rng(RANDOM_STATE)
     MODELS_DIR.mkdir(exist_ok=True)
 
-    # --- Données ------------------------------------------------------
+    # --- Data -----------------------------------------------------------
     raw = pd.read_csv(DATA_PATH)
     y = (raw["Churn"] == "Yes").astype(int).to_numpy()
     X = prepare_frame(raw)
-    print(f"[DATA] {len(X)} lignes, taux de churn : {y.mean():.1%}")
+    print(f"[DATA] {len(X)} rows, churn rate: {y.mean():.1%}")
 
-    # --- Preprocessor (fit sur le train uniquement, pas de fuite) -----
+    # --- Preprocessor (fit on train only, no leakage) -------------------
     preprocessor = ColumnTransformer(
         transformers=[
             ("num", StandardScaler(), NUMERIC_COLS),
@@ -106,9 +106,9 @@ def main() -> None:
     )
     X_train_t = preprocessor.fit_transform(X_train)
     X_test_t = preprocessor.transform(X_test)
-    print(f"[PREPROC] Vecteur transformé : {X_train_t.shape[1]} features")
+    print(f"[PREPROC] Transformed vector: {X_train_t.shape[1]} features")
 
-    # --- Modèle 1 : churn (XGBoost) ------------------------------------
+    # --- Model 1: churn (XGBoost) ---------------------------------------
     churn_model = XGBClassifier(
         n_estimators=300,
         max_depth=5,
@@ -127,10 +127,10 @@ def main() -> None:
     churn_latency = measure_inference_time(churn_model, X_test_t)
     print(
         f"[CHURN] AUC={churn_auc:.3f}  acc={churn_acc:.3f}  "
-        f"F1={churn_f1:.3f}  inférence={churn_latency:.2f} ms/ligne"
+        f"F1={churn_f1:.3f}  inference={churn_latency:.2f} ms/row"
     )
 
-    # --- Modèle 2 : recommandation d'offre (données synthétiques) ------
+    # --- Model 2: offer recommendation (synthetic data) -----------------
     synthetic_idx = rng.integers(0, len(X), size=N_SYNTHETIC)
     X_syn = X.iloc[synthetic_idx].reset_index(drop=True)
     y_syn = np.array([assign_offer(row, rng) for _, row in X_syn.iterrows()])
@@ -152,10 +152,10 @@ def main() -> None:
     offer_latency = measure_inference_time(offer_model, X_syn_t)
     print(
         f"[OFFER] acc={offer_acc:.3f}  F1-macro={offer_f1:.3f}  "
-        f"inférence={offer_latency:.2f} ms/ligne"
+        f"inference={offer_latency:.2f} ms/row"
     )
 
-    # --- Modèle 3 : segmentation K-Means (CronJob) ----------------------
+    # --- Model 3: K-Means segmentation (CronJob) ------------------------
     X_all_t = preprocessor.transform(X)
     kmeans = KMeans(n_clusters=4, n_init=10, random_state=RANDOM_STATE)
     kmeans.fit(X_all_t)
@@ -166,7 +166,7 @@ def main() -> None:
         f"clusters={dict(enumerate(sizes.tolist()))}"
     )
 
-    # --- Sauvegarde des artefacts --------------------------------------
+    # --- Artifact saving ------------------------------------------------
     artifacts = {
         "preprocessor.pkl": preprocessor,
         "churn_model.pkl": churn_model,
@@ -177,7 +177,7 @@ def main() -> None:
         path = MODELS_DIR / name
         joblib.dump(obj, path, compress=3)
         size_kb = path.stat().st_size / 1024
-        print(f"[SAVE] {name} : {size_kb:.0f} Ko")
+        print(f"[SAVE] {name}: {size_kb:.0f} KB")
 
 
 if __name__ == "__main__":
