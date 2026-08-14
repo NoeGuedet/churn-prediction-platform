@@ -6,7 +6,7 @@
 # Outputs: docs/captures/challenge_{nominal,charge,stress}.txt
 set -u
 cd "$(dirname "$0")/.."
-NS=projet-noe
+NS=churn-prediction-platform
 mkdir -p docs/captures
 
 pkill -f "port-forward svc/inference-svc" 2>/dev/null

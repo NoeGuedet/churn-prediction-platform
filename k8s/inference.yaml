@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: inference
-          image: noeguedet/orchestration-ml-inference:1.0.0
+          image: noeguedet/churn-prediction-platform-inference:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8002
@@ -55,7 +55,7 @@ spec:
             periodSeconds: 20
 ---
 # NodePort: the only service exposed outside the cluster (the load
-# script reaches it via `minikube service inference-svc -n projet-noe --url`).
+# script reaches it via `minikube service inference-svc -n churn-prediction-platform --url`).
 apiVersion: v1
 kind: Service
 metadata:
