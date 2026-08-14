@@ -5,7 +5,7 @@ inference-dcf79545d-bdz2p        1/1   Running     0     103m
 monitoring-6dcbc9797-s4p72       1/1   Running     0     102m
 preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     53m
 segmentation-29738227-h6vjx      0/1   Completed   0     6m36s
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 profils clients chargés depuis ./data/churn.csv
 [TEST] case=churn  rate=2000 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
 [TEST] Début : 15:13:37
@@ -41,7 +41,7 @@ inference-dcf79545d-bdz2p        1/1   Running     0     108m
 monitoring-6dcbc9797-s4p72       1/1   Running     0     107m
 preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     58m
 segmentation-29738227-h6vjx      0/1   Completed   0     11m
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 profils clients chargés depuis ./data/churn.csv
 [TEST] case=churn  rate=2500 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
 [TEST] Début : 15:18:37
@@ -77,7 +77,7 @@ inference-dcf79545d-bdz2p        1/1   Running     0     113m
 monitoring-6dcbc9797-s4p72       1/1   Running     0     112m
 preprocessing-7c7dc7549d-2rdzb   1/1   Running     0     63m
 segmentation-29738227-h6vjx      0/1   Completed   0     16m
-[INFO] 7043 profils clients chargés depuis /Users/noe/projects/orchestration_ml/data/churn.csv
+[INFO] 7043 profils clients chargés depuis ./data/churn.csv
 [TEST] case=churn  rate=3000 req/min  duration=300s
 [TEST] URL : http://localhost:8002/predict
 [TEST] Début : 15:23:37
