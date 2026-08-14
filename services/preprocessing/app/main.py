@@ -1,4 +1,4 @@
-"""Preprocessing service — case 3 (telecom churn).
+"""Preprocessing service — telecom churn.
 
 Receives a raw customer profile (JSON, fields potentially as strings),
 applies the trained preprocessor (scaling + one-hot) and returns the

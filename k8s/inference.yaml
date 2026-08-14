@@ -9,7 +9,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1   # cf. ADR section 5 : le surge (500m/512Mi) tient dans la marge du quota
+      maxSurge: 1   # see ADR section 5: the surge (450m/544Mi) fits within the quota margin
       maxUnavailable: 0
   selector:
     matchLabels:
@@ -54,8 +54,8 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 20
 ---
-# NodePort : seul service exposé hors du cluster (script de charge via
-# `minikube service inference-svc -n projet-noe --url`).
+# NodePort: the only service exposed outside the cluster (the load
+# script reaches it via `minikube service inference-svc -n projet-noe --url`).
 apiVersion: v1
 kind: Service
 metadata:

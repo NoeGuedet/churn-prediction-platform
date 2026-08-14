@@ -27,10 +27,10 @@ spec:
             - containerPort: 8001
           env:
             - name: WORKERS
-              # 1 worker suffit : ~5-10 ms de CPU par transformation,
-              # très en dessous de 150 req/min. Chaque worker charge
-              # pandas+sklearn (~150Mi) — 2 workers dépassaient les
-              # requests (mesure kubectl top : 305Mi).
+              # 1 worker is enough: ~5-10 ms of CPU per transform,
+              # well below 150 req/min. Each worker loads
+              # pandas+sklearn (~150Mi) — 2 workers exceeded the
+              # requests (kubectl top measurement: 305Mi).
               value: "1"
           resources:
             requests:

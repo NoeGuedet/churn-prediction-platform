@@ -1,5 +1,5 @@
-# Plafond du namespace : la somme des requests/limits de tous les pods
-# ne peut pas dépasser ces valeurs (cas 3 : 2500m / 1.5Gi).
+# Namespace ceiling: the sum of all pods' requests/limits cannot
+# exceed these values (2500m CPU / 1.5Gi memory).
 apiVersion: v1
 kind: ResourceQuota
 metadata:

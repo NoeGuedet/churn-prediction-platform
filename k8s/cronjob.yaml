@@ -1,6 +1,6 @@
-# Modèle 3 (optionnel) : segmentation K-Means recalculée toutes les heures.
-# Ne consomme des ressources que pendant l'exécution — mais ses requests
-# s'ajoutent temporairement au quota (cf. ADR, section 5).
+# Model 3 (optional): K-Means segmentation recomputed every hour.
+# Only consumes resources while running — but its requests
+# temporarily count against the quota (see ADR, section 5).
 apiVersion: batch/v1
 kind: CronJob
 metadata:

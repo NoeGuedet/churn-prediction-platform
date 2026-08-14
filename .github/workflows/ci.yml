@@ -1,6 +1,6 @@
-# Pipeline CI/CD : tests bloquants (couverture >= 80 %), puis build et
-# push des images Docker Hub uniquement si les tests passent.
-# Sur les pull requests, les images sont construites mais non poussées.
+# CI/CD pipeline: blocking tests (coverage >= 80%), then build and
+# push Docker Hub images only if the tests pass.
+# On pull requests, images are built but not pushed.
 name: ci
 
 on:
@@ -13,7 +13,7 @@ env:
 
 jobs:
   # ------------------------------------------------------------------
-  # Étape 1 : tests. Si ce job échoue, aucun build n'est déclenché.
+  # Stage 1: tests. If this job fails, no build is triggered.
   # ------------------------------------------------------------------
   test:
     runs-on: ubuntu-latest
@@ -25,20 +25,20 @@ jobs:
           python-version: "3.14"
           cache: pip
 
-      - name: Installer les dépendances
+      - name: Install dependencies
         run: |
           pip install -r requirements-dev.txt \
                       -r services/preprocessing/requirements.txt \
                       -r services/inference/requirements.txt \
                       -r services/monitoring/requirements.txt
 
-      # pytest.ini impose --cov-fail-under=80 : le job échoue sous 80 %.
-      - name: Tests (couverture >= 80 %, bloquant)
+      # pytest.ini enforces --cov-fail-under=80: the job fails below 80%.
+      - name: Tests (coverage >= 80%, blocking)
         run: pytest
 
   # ------------------------------------------------------------------
-  # Étape 2 : build multi-arch (amd64 + arm64, pour couvrir les machines
-  # Intel et Apple Silicon) et push sur Docker Hub.
+  # Stage 2: multi-arch build (amd64 + arm64, to cover both Intel and
+  # Apple Silicon machines) and push to Docker Hub.
   # ------------------------------------------------------------------
   build-and-push:
     needs: test
@@ -49,24 +49,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # QEMU : émulation pour construire les images arm64 depuis un
-      # runner x86_64.
+      # QEMU: emulation to build arm64 images from an x86_64 runner.
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
-      # Identifiants dans les secrets chiffrés du repo — jamais en clair.
+      # Credentials in the repo's encrypted secrets — never in plaintext.
       - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build (${{ matrix.service }}) et push
+      - name: Build (${{ matrix.service }}) and push
         uses: docker/build-push-action@v6
         with:
           context: .
           file: services/${{ matrix.service }}/Dockerfile
           platforms: linux/amd64,linux/arm64
-          # Push uniquement sur main ; sur PR, le build sert de validation.
+          # Push only on main; on PRs, the build acts as validation.
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/orchestration-ml-${{ matrix.service }}:${{ env.VERSION }}

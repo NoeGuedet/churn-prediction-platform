@@ -1,4 +1,4 @@
-"""Inference service — case 3 (telecom churn).
+"""Inference service — telecom churn.
 
 Receives a raw customer profile on POST /predict, delegates the
 transformation to the preprocessing service, computes the churn score

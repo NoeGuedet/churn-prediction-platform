@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Training of the three models for the telecom churn use case.
+"""Training of the three models for the telecom churn platform.
 
 Produces the versioned artifacts in models/:
   - preprocessor.pkl  : fitted ColumnTransformer (shared by all models)

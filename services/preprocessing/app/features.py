@@ -34,7 +34,7 @@ CATEGORICAL_COLS = [
 # Feature order as expected by the preprocessor's input.
 ALL_FEATURES = NUMERIC_COLS + CATEGORICAL_COLS
 
-# The 5 fictitious offer categories (case 3).
+# The 5 fictitious offer categories.
 OFFER_LABELS = [
     "discount",
     "premium_support",

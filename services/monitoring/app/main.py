@@ -1,4 +1,4 @@
-"""Monitoring service — case 3 (telecom churn).
+"""Monitoring service — telecom churn.
 
 Records the events sent by the inference service (requests,
 predictions, latencies, statuses) and exposes aggregated metrics on

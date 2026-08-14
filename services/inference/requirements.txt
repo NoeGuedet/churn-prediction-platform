@@ -5,5 +5,5 @@ httpx==0.28.1
 scikit-learn==1.9.0
 joblib==1.5.3
 numpy==2.5.1
-# xgboost est installé séparément avec --no-deps (voir Dockerfile) :
-# son wheel Linux embarque ~400 Mo de librairies CUDA inutiles en CPU-only.
+# xgboost is installed separately with --no-deps (see Dockerfile):
+# its Linux wheel bundles ~400 MB of CUDA libraries, useless on CPU-only.
