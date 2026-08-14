@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: preprocessing
-          image: noeguedet/orchestration-ml-preprocessing:1.0.0
+          image: noeguedet/churn-prediction-platform-preprocessing:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8001

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: services/preprocessing/Dockerfile
-    image: orchestration-ml/preprocessing:1.0.0
+    image: churn-prediction-platform/preprocessing:1.0.0
     ports:
       - "8001:8001"
 
@@ -11,7 +11,7 @@ services:
     build:
       context: .
       dockerfile: services/inference/Dockerfile
-    image: orchestration-ml/inference:1.0.0
+    image: churn-prediction-platform/inference:1.0.0
     ports:
       - "8002:8002"
     environment:
@@ -27,6 +27,6 @@ services:
     build:
       context: .
       dockerfile: services/monitoring/Dockerfile
-    image: orchestration-ml/monitoring:1.0.0
+    image: churn-prediction-platform/monitoring:1.0.0
     ports:
       - "8003:8003"

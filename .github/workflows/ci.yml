@@ -68,7 +68,7 @@ jobs:
           # Push only on main; on PRs, the build acts as validation.
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/orchestration-ml-${{ matrix.service }}:${{ env.VERSION }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/orchestration-ml-${{ matrix.service }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/churn-prediction-platform-${{ matrix.service }}:${{ env.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/churn-prediction-platform-${{ matrix.service }}:latest
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
