@@ -1,4 +1,4 @@
-=== kubectl top pods -n projet-noe (au repos, après warm-up) ===
+=== kubectl top pods -n projet-noe (at rest, after warm-up) ===
 NAME                             CPU(cores)   MEMORY(bytes)   
 inference-dcf79545d-bdz2p        7m           249Mi           
 monitoring-6dcbc9797-s4p72       10m          52Mi            

@@ -1,9 +1,9 @@
 pytest==9.1.1
 pytest-cov==7.1.0
 httpx==0.28.1
-# Requis pour importer le service d'inférence dans les tests
-# (installé avec --no-deps dans l'image Docker, cf. Dockerfile).
+# Required to import the inference service in tests
+# (installed with --no-deps in the Docker image, see Dockerfile).
 xgboost==3.3.0
-# Requis par les scripts (load_test.py, analyze_threshold.py).
+# Required by the scripts (load_test.py, analyze_threshold.py).
 requests==2.34.2
 matplotlib==3.11.1
