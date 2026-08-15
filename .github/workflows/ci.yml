@@ -1,6 +1,7 @@
-# CI/CD pipeline: blocking tests (coverage >= 80%), then build and
-# push Docker Hub images only if the tests pass.
-# On pull requests, images are built but not pushed.
+# CI/CD pipeline: blocking tests (coverage >= 80%), then multi-arch
+# build validation, then deployment to the self-hosted LXC over SSH
+# (through Tailscale) on pushes to main.
+# On pull requests, only tests and builds run (validation).
 name: ci
 
 on:
@@ -13,7 +14,7 @@ env:
 
 jobs:
   # ------------------------------------------------------------------
-  # Stage 1: tests. If this job fails, no build is triggered.
+  # Stage 1: tests. If this job fails, nothing else is triggered.
   # ------------------------------------------------------------------
   test:
     runs-on: ubuntu-latest
@@ -39,9 +40,10 @@ jobs:
 
   # ------------------------------------------------------------------
   # Stage 2: multi-arch build (amd64 + arm64, to cover both Intel and
-  # Apple Silicon machines) and push to Docker Hub.
+  # Apple Silicon machines). Validation only — images are not published
+  # to any registry; production builds them locally on the host.
   # ------------------------------------------------------------------
-  build-and-push:
+  build:
     needs: test
     runs-on: ubuntu-latest
     strategy:
@@ -54,22 +56,51 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
-      # Credentials in the repo's encrypted secrets — never in plaintext.
-      - uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build (${{ matrix.service }}) and push
+      - name: Build (${{ matrix.service }})
         uses: docker/build-push-action@v6
         with:
           context: .
           file: services/${{ matrix.service }}/Dockerfile
           platforms: linux/amd64,linux/arm64
-          # Push only on main; on PRs, the build acts as validation.
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/churn-prediction-platform-${{ matrix.service }}:${{ env.VERSION }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/churn-prediction-platform-${{ matrix.service }}:latest
+          push: false
+          tags: churn-prediction-platform/${{ matrix.service }}:ci
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  # ------------------------------------------------------------------
+  # Stage 3: deployment on the self-hosted LXC. The runner joins the
+  # tailnet ephemerally (OAuth client, tag:ci), then pulls the code and
+  # rebuilds/restarts the stack over SSH. Requires the environment
+  # "production" approval if configured in the repo settings.
+  # ------------------------------------------------------------------
+  deploy:
+    needs: [test, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Join tailnet
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          # Waits until the LXC is reachable before deploying.
+          ping: ${{ secrets.VM_HOST }}
+
+      - name: Deploy over SSH
+        env:
+          VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+          VM_SSH_KNOWN_HOSTS: ${{ secrets.VM_SSH_KNOWN_HOSTS }}
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$VM_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$VM_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes "$VM_USER@$VM_HOST" \
+            'cd /opt/churn-prediction-platform && \
+             git pull --ff-only && \
+             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build && \
+             docker image prune -f'

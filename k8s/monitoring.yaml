@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: monitoring
-          image: noeguedet/churn-prediction-platform-monitoring:1.0.0
+          image: churn-prediction-platform/monitoring:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8003
