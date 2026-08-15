@@ -61,6 +61,12 @@ docker compose up --build -d
 ```bash
 minikube start --cpus=4 --memory=6144 --driver=docker
 minikube addons enable metrics-server
+
+# Images are not published to any registry: build them inside minikube's Docker
+eval $(minikube docker-env)
+docker compose build
+docker build -f services/segmentation/Dockerfile -t churn-prediction-platform/segmentation:1.0.0 .
+
 kubectl apply -f k8s/ -n churn-prediction-platform
 kubectl port-forward svc/inference-svc 8002:8002 -n churn-prediction-platform &
 ```

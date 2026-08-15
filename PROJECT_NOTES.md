@@ -177,12 +177,13 @@ Standalone script run 1×/hour: reloads `churn.csv`, applies the shared preproce
 
 ### 4.2 CI/CD (`.github/workflows/ci.yml`)
 
-Two-stage GitHub Actions pipeline:
+Three-stage GitHub Actions pipeline:
 
 1. **test**: install, `pytest` (blocks below 80% coverage).
-2. **build-and-push** (only if tests are green): **multi-arch** build (`linux/amd64` + `linux/arm64` via QEMU — the target machine may be Intel or Apple Silicon) of the 4 images in a matrix, push to Docker Hub with `1.0.0` + `latest` tags. On pull requests, the build acts as validation but does not push. Credentials in GitHub encrypted secrets (`DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`), never in plaintext.
+2. **build** (only if tests are green): **multi-arch** build (`linux/amd64` + `linux/arm64` via QEMU — the target machine may be Intel or Apple Silicon) of the 5 images in a matrix. Validation only: the images are not published to any registry.
+3. **deploy** (only on `main`): the runner joins the Tailscale tailnet ephemerally (OAuth client, `tag:ci`), then redeploys the self-hosted LXC over SSH — `git pull --ff-only` + `docker compose up -d --build`. All credentials live in GitHub encrypted secrets (Tailscale OAuth client, SSH key, pinned `known_hosts`), never in plaintext.
 
-A pipeline that pushed despite red tests would be broken by design — here the build explicitly depends on test success (`needs: test`).
+A pipeline that deployed despite red tests would be broken by design — here both the build and the deploy explicitly depend on test success (`needs: test`).
 
 ### 4.3 Kubernetes (`k8s/`)
 

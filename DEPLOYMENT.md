@@ -60,6 +60,27 @@ git pull
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
+## Continuous deployment (optional)
+
+The repo's CI/CD pipeline (`.github/workflows/ci.yml`) can redeploy automatically on every push to `main`: after tests and build validation, a `deploy` job joins your Tailscale tailnet ephemerally and runs the update commands above over SSH. No SSH port is exposed to the internet.
+
+Setup on the host (once):
+
+- Clone the repo to `/opt/churn-prediction-platform` (the path used by the deploy job), owned by a dedicated non-root user in the `docker` group.
+- Authorize a dedicated SSH key pair for that user (the CI holds the private key).
+
+Repository secrets to create (Settings → Secrets and variables → Actions):
+
+| Secret | Content |
+|---|---|
+| `TS_OAUTH_CLIENT_ID` / `TS_OAUTH_SECRET` | Tailscale OAuth client (writable `auth_keys` scope, tag `tag:ci`, ephemeral) |
+| `VM_SSH_KEY` | Private key of the dedicated deploy key pair |
+| `VM_HOST` | Tailscale hostname of the LXC (e.g. `lxc-churn.<tailnet>.ts.net`) |
+| `VM_USER` | The dedicated deploy user |
+| `VM_SSH_KNOWN_HOSTS` | Output of `ssh-keyscan <VM_HOST>` — pinned to prevent MITM |
+
+To require a manual approval before each deployment, create a GitHub Environment named `production` with yourself as required reviewer — the `deploy` job is already wired to it.
+
 ## Resource limits
 
 | Service | CPU limit | Memory limit |
